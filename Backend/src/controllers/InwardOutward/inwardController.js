@@ -459,6 +459,52 @@ const getInwarListTwo = async (req, res) => {
   }
 };
 
+const getInwarDocUploadList = async (req, res) => {
+  let connection;
+  try {
+    const { ulbid, inwardNo } = req.body;
+    if (!ulbid) {
+      return res.json({ success: false, errorMessage: "UserId is required" });
+    }
+    if (!inwardNo) {
+      return res.json({
+        success: false,
+        errorMessage: "Inwared No is required",
+      });
+    }
+    connection = await getConnection();
+    const query = `select num_inward_inwardid inwardid,num_inward_inwardno inwardno,date_inward_inwdate inwdate,
+    num_inward_senderid senderid,num_inward_doctype doctype,var_inward_subject subject, 
+    var_inward_refno refno,date_inward_refdate refdate,var_inward_lettertype lettertype,num_inward_inwmodeid
+    inwmodeid,var_inward_from inwardFrom,var_inward_address address  
+    from aoio_inward_mas where num_inward_inwardno=:inwardNo
+    and num_iinward_ulbid=:ulbid`;
+
+    const bind = {
+      ulbid: Number(ulbid),
+      inwardNo: String(inwardNo),
+    };
+    const result = await connection.execute(query, bind, {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+    });
+    res.json({
+      success: true,
+      data: result.rows || [],
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error("Error closing DB connection:", err);
+      }
+    }
+  }
+};
+
 const AOIO_INWARD_docUpdt = async (req, res) => {
   let connection;
   try {
@@ -682,6 +728,7 @@ module.exports = {
   insertInwardDocuments,
   getInwardDetailsList,
   getInwarListTwo,
+  getInwarDocUploadList,
   AOIO_INWARD_docUpdt,
   updateInwardDocumentBlobs,
   getInwarListThree,

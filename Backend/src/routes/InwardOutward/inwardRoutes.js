@@ -12,6 +12,7 @@ const {
   getInwarListThree,
   AOIO_INWARD_docUpdt,
   updateInwardDocumentBlobs,
+  getInwarDocUploadList,
 } = require("../../controllers/InwardOutward/inwardController");
 const { validate } = require("../../validators/validate");
 const {
@@ -32,6 +33,7 @@ router.post("/aoio_inward_ins", validate(aoioInwardInsSchema), aoio_inward_ins);
 router.post("/insertInwardDocuments", insertInwardDocuments);
 router.post("/getInwardDetailsList", getInwardDetailsList);
 router.post("/getInwarListTwo", getInwarListTwo);
+router.post("/getInwarDocUploadList", getInwarDocUploadList);
 router.post(
   "/AOIO_INWARD_docUpdt",
   validate(inwardDocUpdtSchema),
