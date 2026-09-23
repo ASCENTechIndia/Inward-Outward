@@ -543,7 +543,7 @@ const getExistingDocList = async (req, res) => {
     const result = await connection.execute(query, bind, {
       outFormat: oracledb.OUT_FORMAT_OBJECT,
       fetchInfo: {
-        FILEDATA: { type: oracledb.BUFFER }, 
+        FILEDATA: { type: oracledb.BUFFER },
       },
     });
 
@@ -653,7 +653,6 @@ const updateInwardDocumentBlobs = async (req, res) => {
 
     for (const doc of documents) {
       try {
-        // Decode Base64 to Buffer for Oracle BLOB
         const fileBuffer = Buffer.from(doc.fileBytes, "base64");
 
         const bind = {
@@ -788,6 +787,280 @@ const getInwarListThree = async (req, res) => {
   }
 };
 
+const getTransferFormData = async (req, res) => {
+  let connection;
+  try {
+    const { inwardNo, ulbid, userDeptId } = req.body;
+
+    if (!inwardNo) {
+      return res.json({
+        success: false,
+        errorMessage: "Inward No is required",
+      });
+    }
+    if (!ulbid) {
+      return res.json({
+        success: false,
+        errorMessage: "UlbId is required",
+      });
+    }
+    if (!userDeptId) {
+      return res.json({
+        success: false,
+        errorMessage: "User Department Id is required",
+      });
+    }
+
+    connection = await getConnection();
+
+    const checkQuery = `
+      SELECT num_transfer_frmprabhagid,
+             num_transfer_frmdeptid,
+             num_transfer_purposeid,
+             var_transfer_insby,
+             num_transfer_transtoid
+      FROM   aoio_transfer_det
+      WHERE  num_transfer_inwardno = :inwardNo
+        AND  num_transfer_todeptid = :userDeptId
+        AND  var_transfer_status   = 'F'
+        AND  num_transfer_ulbid    = :ulbid
+      ORDER  BY date_transfer_indate
+    `;
+
+    const checkBind = {
+      inwardNo: String(inwardNo),
+      userDeptId: Number(userDeptId),
+      ulbid: Number(ulbid),
+    };
+
+    const checkResult = await connection.execute(checkQuery, checkBind, {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+    });
+
+    const hasPendingTransfer = checkResult.rows.length > 0;
+
+    let formQuery;
+    let formBind;
+
+    if (hasPendingTransfer) {
+      const transId = checkResult.rows[0].NUM_TRANSFER_TRANSTOID;
+
+      formQuery = `
+        SELECT aim.num_inward_inwardid      AS INWARDID,
+               aim.num_inward_inwardno      AS INWARDNO,
+               aim.date_inward_inwdate      AS INWARDDATE,
+               aim.num_inward_senderid      AS SENDERID,
+               aim.num_inward_sendersubtypeid AS SENDERSUBTYPEID,
+               aim.num_inward_doctype       AS DOCTYPE,
+               aim.num_inward_docsubtype    AS DOCSUBTYPE,
+               aim.var_inward_refno         AS REFNO,
+               aim.date_inward_refdate      AS REFDATE,
+               aim.var_inward_from          AS INWARDFROM,
+               aim.var_inward_subject       AS SUBJECT,
+               aim.var_inward_lettertype    AS LETTERTYPE,
+               letr.var_lettertype_type     AS LETTERTYPE_NAME,
+               itd.num_inwardto_inwardtoid  AS TRANSID
+        FROM   aoio_inward_mas aim
+        INNER  JOIN aoio_inwardto_det itd
+                 ON itd.num_inwardto_inwardid = aim.num_inward_inwardid
+                AND itd.num_inwardto_inwardno = aim.num_inward_inwardno
+                AND itd.num_inwardto_ulbid    = aim.num_iinward_ulbid
+        LEFT   JOIN aoio_lettertype_det letr
+                 ON letr.num_lettertype_id = aim.var_inward_lettertype
+        WHERE  itd.num_inwardto_inwardtoid = :transId
+          AND  aim.var_inward_status <> 'C'
+          AND  itd.num_inwardto_ulbid = :ulbid
+      `;
+
+      formBind = {
+        transId: Number(transId),
+        ulbid: Number(ulbid),
+      };
+    } else {
+      formQuery = `
+        SELECT aim.num_inward_inwardid      AS INWARDID,
+               aim.num_inward_inwardno      AS INWARDNO,
+               aim.date_inward_inwdate      AS INWARDDATE,
+               aim.num_inward_senderid      AS SENDERID,
+               aim.num_inward_sendersubtypeid AS SENDERSUBTYPEID,
+               aim.num_inward_doctype       AS DOCTYPE,
+               aim.num_inward_docsubtype    AS DOCSUBTYPE,
+               aim.var_inward_refno         AS REFNO,
+               aim.date_inward_refdate      AS REFDATE,
+               aim.var_inward_from          AS INWARDFROM,
+               aim.var_inward_subject       AS SUBJECT,
+               aim.var_inward_lettertype    AS LETTERTYPE,
+               letr.var_lettertype_type     AS LETTERTYPE_NAME,
+               itd.num_inwardto_inwardtoid  AS TRANSID
+        FROM   aoio_inward_mas aim
+        LEFT   JOIN aoio_lettertype_det letr
+                 ON letr.num_lettertype_id = aim.var_inward_lettertype
+        INNER  JOIN aoio_inwardto_det itd
+                 ON itd.num_inwardto_inwardid = aim.num_inward_inwardid
+                AND itd.num_inwardto_inwardno = aim.num_inward_inwardno
+                AND itd.num_inwardto_ulbid    = aim.num_iinward_ulbid
+        WHERE  aim.num_inward_inwardno = :inwardNo
+          AND  aim.var_inward_status   <> 'C'
+          AND  itd.num_inwardto_ulbid  = :ulbid
+      `;
+
+      formBind = {
+        inwardNo: String(inwardNo),
+        ulbid: Number(ulbid),
+      };
+    }
+
+    const formResult = await connection.execute(formQuery, formBind, {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+    });
+
+    if (!formResult.rows || formResult.rows.length === 0) {
+      return res.json({
+        success: false,
+        errorMessage: "No record found for this inward transfer",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: formResult.rows[0],
+    });
+  } catch (error) {
+    console.error("getTransferFormData error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error("Error closing DB connection:", err);
+      }
+    }
+  }
+};
+
+const getForwardTransferData = async (req, res) => {
+  let connection;
+  try {
+    const { userId, ulbid, inwardNo, inwardId } = req.body;
+    if (!userId) {
+      return res.json({ success: false, errorMessage: "UserId is required" });
+    }
+    if (!ulbid) {
+      return res.json({ success: false, errorMessage: "UserId is required" });
+    }
+    if (!inwardNo) {
+      return res.json({
+        success: false,
+        errorMessage: "Inward No is required",
+      });
+    }
+    if (!inwardId) {
+      return res.json({
+        success: false,
+        errorMessage: "Inward No is required",
+      });
+    }
+
+    connection = await getConnection();
+    const query = `
+    SELECT num_transfer_frmprabhagid,
+          num_transfer_frmdeptid,
+          num_transfer_purposeid,
+          var_transfer_insby,
+          num_user_desgid
+    FROM   aoio_transfer_det
+    INNER  JOIN admins.aoma_user_def 
+            ON var_transfer_insby = num_user_userid 
+            AND num_user_ulbid    = num_transfer_ulbid
+    WHERE  num_transfer_inwardid = :inwardId
+      AND  num_transfer_inwardno = :inwardNo
+      AND  num_transfer_empid    = :userId
+      AND  var_transfer_status   = 'T'
+      AND  num_transfer_ulbid    = :ulbid`;
+
+    const bind = {
+      ulbid: Number(ulbid),
+      userId,
+      inwardId: Number(inwardId),
+      inwardNo: inwardNo,
+    };
+    const result = await connection.execute(query, bind, {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+    });
+    res.json({
+      success: true,
+      data: result.rows || [],
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error("Error closing DB connection:", err);
+      }
+    }
+  }
+};
+
+const aoio_transfer_ins = async (req, res) => {
+  let connection;
+  try {
+    const payload = req.body;
+    connection = await getConnection();
+
+    const query = `BEGIN 
+      aoio_transfer_ins(
+        :IN_USERID,
+        :IN_inwardid,
+        :IN_INWARDNO,
+        :in_ipaddress,
+        :in_trfstr,
+        :in_orgId,
+        :out_ErrorCode,
+        :out_ErrorMsg
+      );
+      END;`;
+
+    const bind = {
+      IN_USERID: payload.IN_USERID,
+      IN_inwardid: Number(payload.IN_inwardid),
+      IN_INWARDNO: payload.IN_INWARDNO,
+      in_ipaddress: payload.in_ipaddress,
+      in_trfstr: payload.in_trfstr,
+      in_orgId: Number(payload.ulbid),
+      out_ErrorCode: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
+      out_ErrorMsg: {
+        dir: oracledb.BIND_OUT,
+        type: oracledb.STRING,
+        maxSize: 4000,
+      },
+    };
+
+    const result = await connection.execute(query, bind, { autoCommit: true });
+
+    res.json({
+      success: true,
+      errorCode: result.outBinds.out_ErrorCode,
+      errorMessage: result.outBinds.out_ErrorMsg,
+    });
+  } catch (error) {
+    console.error("failed to save inward transfer data:", error);
+    res.status(500).json({ success: false, message: error.message });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error("Error closing DB connection:", err);
+      }
+    }
+  }
+};
+
 module.exports = {
   getSendersDropdown,
   getSubTypesDropdown,
@@ -803,4 +1076,7 @@ module.exports = {
   AOIO_INWARD_docUpdt,
   updateInwardDocumentBlobs,
   getInwarListThree,
+  getTransferFormData,
+  getForwardTransferData,
+  aoio_transfer_ins,
 };

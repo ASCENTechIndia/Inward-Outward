@@ -14,12 +14,16 @@ const {
   updateInwardDocumentBlobs,
   getInwarDocUploadList,
   getExistingDocList,
+  getTransferFormData,
+  getForwardTransferData,
+  aoio_transfer_ins,
 } = require("../../controllers/InwardOutward/inwardController");
 const { validate } = require("../../validators/validate");
 const {
   aoioInwardInsSchema,
   inwardDocUpdtSchema,
   updateInwardDocumentBlobsSchema,
+  inwardTransferInsSchema,
 } = require("../../validators/schemas/inwardInsSchema");
 
 const router = express.Router();
@@ -47,5 +51,12 @@ router.post(
   updateInwardDocumentBlobs,
 );
 router.post("/getInwarListThree", getInwarListThree);
+router.post("/getTransferFormData", getTransferFormData);
+router.post("/getForwardTransferData", getForwardTransferData);
+router.post(
+  "/aoio_transfer_ins",
+  validate(inwardTransferInsSchema),
+  aoio_transfer_ins,
+);
 
 module.exports = router;
