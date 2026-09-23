@@ -20,8 +20,7 @@ const FrmInwardDocUpload = () => {
     const ulbid = user?.ulbId;
 
     const { invardNo, row } = location.state;
-    console.log(invardNo);
-    console.log(row);
+
 
     const [applicantTableHeader, setApplicantTableHeader] = useState([
         "आवक क्र.",
@@ -31,17 +30,10 @@ const FrmInwardDocUpload = () => {
         "पासुन",
         "पत्ता"
     ]);
-    const [applicantTableData, setApplicantTableData] = useState([
-        "I2627PRD2202600000007",
-        "23-09-2026",
-        "test",
-        "323",
-        "test",
-        "virar"
-    ]);
+    const [applicantTableData, setApplicantTableData] = useState([]);
 
     const [documentTableHeader, setDocumentTableHeader] = useState([
-        "अनुक्रमांक",
+        "Sr. No.",
         "अनुक्रमांक",
         "दिनांक",
         "Document Name",
@@ -52,6 +44,7 @@ const FrmInwardDocUpload = () => {
     const [anukramank, setAnukramank] = useState("");
     const [documentDate, setDocumentDate] = useState("");
     const [selectedFile, setSelectedFile] = useState(null);
+    const [applicantInwardId, setApplicantInwardId] = useState("")
 
     const formatDateToDDMMYYYY = (dateString) => {
         if (!dateString) return "";
@@ -63,6 +56,79 @@ const FrmInwardDocUpload = () => {
         const year = date.getFullYear();
 
         return `${day}-${month}-${year}`;
+    };
+
+    const fetchApplicationDetails = async () => {
+        try {
+            setLoading(true);
+            const payload = {
+                ulbid,
+                inwardNo: invardNo
+            };
+
+            const response = await apiService.post("getInwarDocUploadList", payload);
+
+            if (response.data.success && response.data.data.length > 0) {
+                const data = response.data.data[0];
+
+                setApplicantTableData([
+                    [
+                        data.INWARDNO,
+                        formatDateToDDMMYYYY(data.INWDATE),
+                        data.SUBJECT,
+                        data.REFNO,
+                        data.INWARDFROM,
+                        data.ADDRESS
+                    ]
+                ]);
+                setApplicantInwardId(data.INWARDID)
+            }
+        } catch (error) {
+            console.error(error)
+        } finally {
+            setLoading(false);
+        }
+
+    };
+
+    const fetchDocuments = async () => {
+        try {
+            setLoading(true);
+
+            const payload = {
+                ulbid,
+                inwardNo: invardNo,
+            };
+
+            const response = await apiService.post(
+                "getExistingDocList",
+                payload
+            );
+
+            console.log("Documents API Response:", response);
+
+            if (response.data.success) {
+                const formattedList = response.data.data.map((item) => ({
+                    id: item.SERIALNO,
+                    anukramank: item.SERIALNO,
+                    date: item.DOCDATE,
+                    fileName: item.DOCUMENTNAME,
+                    file: null,
+                    base64: item.FILE_BASE64,
+                    fileSize: item.FILE_SIZE,
+                    isExisting: true,
+                }));
+
+                setDocumentTableData(formattedList);
+            } else {
+                setDocumentTableData([]);
+            }
+        } catch (error) {
+            console.error("Error fetching documents:", error);
+            setDocumentTableData([]);
+        } finally {
+            setLoading(false);
+        }
     };
 
     const handleFileChange = (e) => {
@@ -111,18 +177,31 @@ const FrmInwardDocUpload = () => {
         try {
             setLoading(true);
 
+            // Check duplicate अनुक्रमांक
+            const isDuplicate = documentTableData.some(
+                (doc) => String(doc.anukramank) === String(anukramank)
+            );
+
+            if (isDuplicate) {
+                alert("हा अनुक्रमांक आधीच वापरलेला आहे.");
+                return;
+            }
+
             // Convert file to Base64
             const base64 = await fileToBase64(selectedFile);
 
             const newDocument = {
-                id: Date.now(),
+                id: anukramank,
                 anukramank: anukramank,
                 date: documentDate,
                 fileName: selectedFile.name,
                 file: selectedFile,
                 base64: base64,
+                fileSize: selectedFile.size,
+                isExisting: false,
             };
 
+            // Add new document while preserving existing documents
             setDocumentTableData((prev) => [
                 ...prev,
                 newDocument,
@@ -143,6 +222,7 @@ const FrmInwardDocUpload = () => {
             }
 
             console.log("Document added:", newDocument);
+
         } catch (error) {
             console.error("File conversion error:", error);
             alert("File process करताना error आला.");
@@ -151,55 +231,162 @@ const FrmInwardDocUpload = () => {
         }
     };
 
-    const documentTableRows = documentTableData.map(
-        (doc, index) => [
-            index + 1,
-            doc.anukramank,
-            formatDateToDDMMYYYY(doc.date),
-            doc.fileName,
+    const documentTableRows = documentTableData.map((doc, index) => [
+        index + 1,
+        doc.anukramank,
+        formatDateToDDMMYYYY(doc.date),
+        doc.fileName,
 
-            <button
-                type="button"
-                className="text-blue-600 underline hover:text-blue-800"
-                onClick={() =>
-                    handleDocumentDownload(doc.file)
+        <button
+            type="button"
+            className="text-blue-600 underline hover:text-blue-800"
+            onClick={() => handleDocumentView(doc)}
+        >
+            View
+        </button>,
+
+        <button
+            type="button"
+            className="text-red-600 underline hover:text-red-800"
+            onClick={() => handleDocumentDelete(doc.id)}
+        >
+            Delete
+        </button>,
+    ]);
+
+    const handleDocumentView = (doc) => {
+        try {
+            if (doc.file) {
+                const fileUrl = URL.createObjectURL(doc.file);
+                window.open(fileUrl, "_blank");
+
+                setTimeout(() => {
+                    URL.revokeObjectURL(fileUrl);
+                }, 60000);
+
+                return;
+            }
+
+            if (doc.base64) {
+                const byteCharacters = atob(doc.base64);
+                const byteNumbers = new Array(byteCharacters.length);
+
+                for (let i = 0; i < byteCharacters.length; i++) {
+                    byteNumbers[i] = byteCharacters.charCodeAt(i);
                 }
-            >
-                View
-            </button>,
 
-            <button
-                type="button"
-                className="text-red-600 underline hover:text-red-800"
-                onClick={() =>
-                    handleDocumentDelete(doc.id)
-                }
-            >
-                Delete
-            </button>,
-        ]
-    );
+                const byteArray = new Uint8Array(byteNumbers);
 
-    const handleDocumentDownload = (file) => {
-        if (!file) {
-            alert("File उपलब्ध नाही.");
-            return;
+                const blob = new Blob([byteArray], {
+                    type: "application/pdf",
+                });
+
+                const fileUrl = URL.createObjectURL(blob);
+
+                window.open(fileUrl, "_blank");
+
+                setTimeout(() => {
+                    URL.revokeObjectURL(fileUrl);
+                }, 60000);
+
+                return;
+            }
+
+            alert("Document उपलब्ध नाही.");
+        } catch (error) {
+            console.error("Error viewing document:", error);
+            alert("Document उघडताना error आला.");
         }
-
-        const fileUrl = URL.createObjectURL(file);
-
-        window.open(fileUrl, "_blank");
-
-        setTimeout(() => {
-            URL.revokeObjectURL(fileUrl);
-        }, 60000);
     };
 
-    const handleDocumentDelete = (anukramank) => {
+    const handleDocumentDelete = (id) => {
         setDocumentTableData((prev) =>
-            prev.filter((row) => row[0] !== anukramank)
+            prev.filter((doc) => doc.id !== id)
         );
     };
+
+    const generateDocStr = (documents) => {
+        return documents
+            .map((doc) => {
+                const date = new Date(doc.date);
+
+                const day = String(date.getDate()).padStart(2, "0");
+
+                const monthNames = [
+                    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+                ];
+
+                const month = monthNames[date.getMonth()];
+                const year = date.getFullYear();
+
+                const formattedDate = `${day}-${month}-${year}`;
+
+                return `${doc.anukramank}$${formattedDate}$1$${doc.fileName}`;
+            })
+            .join("#");
+    };
+
+    const handleGenerate = async () => {
+        try {
+            setLoading(true);
+
+            const docStr = await generateDocStr(documentTableData);
+
+            const appPayload = {
+                "in_UserId": userId,
+                "in_inwardimgid": "0",
+                "in_inwardid": String(applicantInwardId),
+                "in_inwardno": invardNo,
+                "in_DocStr": docStr, // serialNO$date$1(hardcode value)$file-name#
+                "in_orgId": Number(ulbid)
+            }
+
+            const docPayload = {
+                inwardId: String(applicantInwardId),
+                inwardNo: invardNo,
+
+                documents: documentTableData.map((doc) => ({
+                    serialNo: String(doc.anukramank),
+                    documentName: doc.fileName,
+                    fileBytes: doc.base64,
+                })),
+            };
+
+            const appResponse = await apiService.post("AOIO_INWARD_docUpdt", appPayload);
+
+
+            if (appResponse.data.success && appResponse.data.errorCode === -100) {
+                const docResponse = await apiService.post("updateInwardDocumentBlobs", docPayload);
+                const appMessage = appResponse.data.errorMessage;
+
+                if (docResponse.data.success) {
+                    alert(appMessage + ". " + docResponse.data.message);
+                    setAnukramank("");
+                    setApplicantInwardId("");
+                    setApplicantTableData([]);
+                    setDocumentDate("");
+                    setDocumentTableData([]);
+                    setSelectedFile(null);
+                    navigate("/Inward/FrmInwardDtlsDocument", {
+                        replace: true
+                    })
+                }
+            }
+
+        } catch (error) {
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    useEffect(() => {
+        if (ulbid && invardNo) {
+            fetchApplicationDetails();
+            fetchDocuments();
+        }
+    }, [ulbid, invardNo]);
 
     return (
         <Layout
@@ -226,6 +413,7 @@ const FrmInwardDocUpload = () => {
                         <div className="flex items-end gap-3">
                             <Button
                                 type="button"
+                                disabled={true}
                             >
                                 शोधा
                             </Button>
@@ -244,7 +432,10 @@ const FrmInwardDocUpload = () => {
                 </div>
 
                 <div className="mt-3 border-t">
-                    <Table />
+                    <Table
+                        headers={applicantTableHeader}
+                        data={applicantTableData}
+                    />
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-3">
@@ -307,7 +498,7 @@ const FrmInwardDocUpload = () => {
                     <Button
                         type="button"
                         onClick={() => {
-                            // handleGenerate()
+                            handleGenerate();
                         }}
                     >
                         जतन करा
