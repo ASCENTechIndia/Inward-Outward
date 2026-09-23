@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useForm, useFieldArray } from "react-hook-form";
 import Layout from "../../Components/Layout";
 import Label from "../../Components/Label";
@@ -7,6 +7,7 @@ import Button from "../../Components/Button";
 import { useLoader } from "../../Context/LoaderContext";
 import apiService from "../../../apiService";
 import { useAuth } from "../../Context/AuthContext";
+import { useSearchParams } from "react-router-dom";
 
 const getToday = () => {
     const d = new Date();
@@ -17,10 +18,14 @@ const getToday = () => {
 
 const FrmInvardDtls = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const [ searchParams ] = useSearchParams();
     const { setLoading } = useLoader();
     const { user } = useAuth();
     const userId = user?.userId;
     const ulbid = user?.ulbId;
+    const mode = searchParams.get("mode");
+    
 
     const {
         register,
@@ -47,13 +52,13 @@ const FrmInvardDtls = () => {
             // const response = await apiService.post("", payload);
 
             // if (response.success) {
-            // if (Response.data.data.length === 0) {
+            // if (response.data.data.length === 0) {
             //     alert("No Records Found");
             //     setShowTable(false);
             //     return;
             // }
-
-            //         const formatted = Response.data.data.map(item => ({
+            //         const navigateToURL = mode === 1 ? "/Inward/FrmInwardClose" : mode === 2 ? "" : "";
+            //         const formatted = response.data.data.map(item => ({
             //             id: item.id,
             //             number: item.number,
             //             date: item.date,
@@ -69,7 +74,7 @@ const FrmInvardDtls = () => {
             //                         className="p-1.5 rounded-md text-blue-600 border border-blue-300
             // hover:bg-blue-50 active:scale-[0.95] transition-all"
             // onClick={() => {
-            //     navigate("/Inward/FrmInwardClose", {
+            //     navigate(navigateToURL, {
             //         state: {
             //             invardNo: item.number,
             //         }
