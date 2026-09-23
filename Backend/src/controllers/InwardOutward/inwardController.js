@@ -459,6 +459,335 @@ const getInwarListTwo = async (req, res) => {
   }
 };
 
+const getInwarDocUploadList = async (req, res) => {
+  let connection;
+  try {
+    const { ulbid, inwardNo } = req.body;
+    if (!ulbid) {
+      return res.json({ success: false, errorMessage: "UserId is required" });
+    }
+    if (!inwardNo) {
+      return res.json({
+        success: false,
+        errorMessage: "Inwared No is required",
+      });
+    }
+    connection = await getConnection();
+    const query = `select num_inward_inwardid inwardid,num_inward_inwardno inwardno,date_inward_inwdate inwdate,
+    num_inward_senderid senderid,num_inward_doctype doctype,var_inward_subject subject, 
+    var_inward_refno refno,date_inward_refdate refdate,var_inward_lettertype lettertype,num_inward_inwmodeid
+    inwmodeid,var_inward_from inwardFrom,var_inward_address address  
+    from aoio_inward_mas where num_inward_inwardno=:inwardNo
+    and num_iinward_ulbid=:ulbid`;
+
+    const bind = {
+      ulbid: Number(ulbid),
+      inwardNo: String(inwardNo),
+    };
+    const result = await connection.execute(query, bind, {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+    });
+    res.json({
+      success: true,
+      data: result.rows || [],
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error("Error closing DB connection:", err);
+      }
+    }
+  }
+};
+
+const getExistingDocList = async (req, res) => {
+  let connection;
+  try {
+    const { ulbid, inwardNo } = req.body;
+
+    if (!ulbid) {
+      return res.json({ success: false, errorMessage: "UlbId is required" });
+    }
+    if (!inwardNo) {
+      return res.json({
+        success: false,
+        errorMessage: "Inward No is required",
+      });
+    }
+
+    connection = await getConnection();
+
+    const query = `
+      SELECT num_inwardimg_inwardid  AS inwardid,
+             num_inwardimg_inwardno  AS inwardno,
+             num_inwardimg_serialno  AS SerialNo,
+             date_inwardimg_adddate  AS DocDate,
+             var_inwardimg_docname   AS DocumentName,
+             blob_inwardimg_document AS FileData
+      FROM   aoio_inwardimg_det
+      WHERE  num_inwardimg_inwardno = :inwardNo
+        AND  num_inwardimg_ulbid    = :ulbid
+      ORDER  BY num_inwardimg_inwardimgid ASC
+    `;
+
+    const bind = {
+      ulbid: Number(ulbid),
+      inwardNo: String(inwardNo),
+    };
+
+    const result = await connection.execute(query, bind, {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+      fetchInfo: {
+        FILEDATA: { type: oracledb.BUFFER }, 
+      },
+    });
+
+    const rows = result.rows.map((row) => ({
+      INWARDID: row.INWARDID,
+      INWARDNO: row.INWARDNO,
+      SERIALNO: row.SERIALNO,
+      DOCDATE: row.DOCDATE,
+      DOCUMENTNAME: row.DOCUMENTNAME,
+      FILE_BASE64: row.FILEDATA ? row.FILEDATA.toString("base64") : null,
+      FILE_SIZE: row.FILEDATA ? row.FILEDATA.length : 0,
+    }));
+
+    res.json({
+      success: true,
+      data: rows,
+    });
+  } catch (error) {
+    console.error("getExistingDocList error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error("Error closing DB connection:", err);
+      }
+    }
+  }
+};
+
+const AOIO_INWARD_docUpdt = async (req, res) => {
+  let connection;
+  try {
+    const payload = req.body;
+    connection = await getConnection();
+
+    const query = `BEGIN 
+      AOIO_INWARD_docUpdt(
+      :in_UserId,
+      :in_inwardimgid,
+      :in_inwardid,
+      :in_inwardno,
+      :in_DocStr,
+      :in_orgId,
+      :out_inwardimgid,
+      :out_ErrorCode,
+      :out_ErrorMsg
+      );
+      END;`;
+
+    const bind = {
+      in_UserId: payload.in_UserId,
+      in_inwardimgid: payload.in_inwardimgid,
+      in_inwardid: payload.in_inwardid,
+      in_inwardno: payload.in_inwardno,
+      in_DocStr: payload.in_DocStr,
+      in_orgId: payload.in_orgId,
+      out_inwardimgid: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
+      out_ErrorCode: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
+      out_ErrorMsg: {
+        dir: oracledb.BIND_OUT,
+        type: oracledb.STRING,
+        maxSize: 4000,
+      },
+    };
+
+    const result = await connection.execute(query, bind, { autoCommit: true });
+
+    res.json({
+      success: true,
+      errorCode: result.outBinds.out_ErrorCode,
+      errorMessage: result.outBinds.out_ErrorMsg,
+      inwardImgId: result.outBinds.out_inwardimgid,
+    });
+  } catch (error) {
+    console.error("failed to save inward data:", error);
+    res.status(500).json({ success: false, message: error.message });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error("Error closing DB connection:", err);
+      }
+    }
+  }
+};
+
+const updateInwardDocumentBlobs = async (req, res) => {
+  let connection;
+  try {
+    const { inwardId, inwardNo, documents } = req.body;
+    connection = await getConnection();
+
+    const query = `
+      UPDATE aoio_inwardimg_det
+      SET    blob_inwardimg_document = :fileBuffer
+      WHERE  num_inwardimg_inwardno  = :inwardNo
+        AND  num_inwardimg_inwardid  = :inwardId
+        AND  num_inwardimg_serialno  = :serialNo
+        AND  var_inwardimg_docname   = :docName
+    `;
+
+    let totalUpdated = 0;
+    const failedRows = [];
+
+    for (const doc of documents) {
+      try {
+        // Decode Base64 to Buffer for Oracle BLOB
+        const fileBuffer = Buffer.from(doc.fileBytes, "base64");
+
+        const bind = {
+          fileBuffer,
+          inwardNo: inwardNo,
+          inwardId: Number(inwardId),
+          serialNo: Number(doc.serialNo),
+          docName: doc.documentName,
+        };
+
+        const result = await connection.execute(query, bind, {
+          autoCommit: true,
+        });
+
+        if (result.rowsAffected > 0) {
+          totalUpdated += result.rowsAffected;
+        } else {
+          failedRows.push({
+            serialNo: doc.serialNo,
+            documentName: doc.documentName,
+            reason: "No matching row found",
+          });
+        }
+      } catch (docErr) {
+        console.error(
+          `Failed to update BLOB for serial ${doc.serialNo}:`,
+          docErr,
+        );
+        failedRows.push({
+          serialNo: doc.serialNo,
+          documentName: doc.documentName,
+          reason: docErr.message,
+        });
+      }
+    }
+
+    if (failedRows.length > 0) {
+      return res.status(207).json({
+        success: false,
+        message: `Updated ${totalUpdated} of ${documents.length} documents`,
+        totalUpdated,
+        failedRows,
+      });
+    }
+
+    res.json({
+      success: true,
+      message: `All ${totalUpdated} documents uploaded successfully`,
+      totalUpdated,
+    });
+  } catch (error) {
+    console.error("updateInwardDocumentBlobs error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error("Error closing DB connection:", err);
+      }
+    }
+  }
+};
+
+const getInwarListThree = async (req, res) => {
+  let connection;
+  try {
+    const { userId, ulbid, fromDate, toDate } = req.body;
+    if (!userId) {
+      return res.json({ success: false, errorMessage: "UserId is required" });
+    }
+    if (!ulbid) {
+      return res.json({ success: false, errorMessage: "UserId is required" });
+    }
+    if (!fromDate) {
+      return res.json({
+        success: false,
+        errorMessage: "From Date is required",
+      });
+    }
+    if (!toDate) {
+      return res.json({ success: false, errorMessage: "To Date is required" });
+    }
+    connection = await getConnection();
+    const query = `SELECT DISTINCT
+       aim.num_iinward_ulbid        AS ulbid,
+       aim.num_inward_inwardid      AS inwardid,
+       aim.num_inward_inwardno      AS inword_no,
+       AIM.date_inward_inwdate      AS inwarddate,
+       AIM.var_inward_refno         AS ref_no,
+       AIM.date_inward_refdate      AS ref_date,
+       AIM.num_inward_mobile        AS mobile_no,
+       AIM.var_inward_subject       AS subject,
+       var_lettertype_type          AS LetterType
+      FROM   aoio_inward_mas aim
+      INNER  JOIN aoio_inwardto_det 
+              ON num_inwardto_inwardid = num_inward_inwardid 
+              AND num_inwardto_inwardno = num_inward_inwardno 
+              AND num_inwardto_ulbid    = num_iinward_ulbid
+      INNER  JOIN aoio_lettertype_det 
+              ON num_lettertype_id = var_inward_lettertype
+      WHERE  var_inward_status <> 'C'
+        AND  num_inwardto_ulbid = :ulbid
+        AND  var_inward_insby   = :userId
+        AND  TRUNC(date_inward_inwdate) >= :fromDate
+        AND  TRUNC(date_inward_inwdate) <= :toDate`;
+
+    const bind = {
+      fromDate,
+      toDate,
+      ulbid: Number(ulbid),
+      userId,
+    };
+    const result = await connection.execute(query, bind, {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+    });
+    res.json({
+      success: true,
+      data: result.rows || [],
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error("Error closing DB connection:", err);
+      }
+    }
+  }
+};
+
 module.exports = {
   getSendersDropdown,
   getSubTypesDropdown,
@@ -469,4 +798,9 @@ module.exports = {
   insertInwardDocuments,
   getInwardDetailsList,
   getInwarListTwo,
+  getInwarDocUploadList,
+  getExistingDocList,
+  AOIO_INWARD_docUpdt,
+  updateInwardDocumentBlobs,
+  getInwarListThree,
 };
