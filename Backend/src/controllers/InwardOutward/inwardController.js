@@ -505,6 +505,76 @@ const getInwarDocUploadList = async (req, res) => {
   }
 };
 
+const getExistingDocList = async (req, res) => {
+  let connection;
+  try {
+    const { ulbid, inwardNo } = req.body;
+
+    if (!ulbid) {
+      return res.json({ success: false, errorMessage: "UlbId is required" });
+    }
+    if (!inwardNo) {
+      return res.json({
+        success: false,
+        errorMessage: "Inward No is required",
+      });
+    }
+
+    connection = await getConnection();
+
+    const query = `
+      SELECT num_inwardimg_inwardid  AS inwardid,
+             num_inwardimg_inwardno  AS inwardno,
+             num_inwardimg_serialno  AS SerialNo,
+             date_inwardimg_adddate  AS DocDate,
+             var_inwardimg_docname   AS DocumentName,
+             blob_inwardimg_document AS FileData
+      FROM   aoio_inwardimg_det
+      WHERE  num_inwardimg_inwardno = :inwardNo
+        AND  num_inwardimg_ulbid    = :ulbid
+      ORDER  BY num_inwardimg_inwardimgid ASC
+    `;
+
+    const bind = {
+      ulbid: Number(ulbid),
+      inwardNo: String(inwardNo),
+    };
+
+    const result = await connection.execute(query, bind, {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+      fetchInfo: {
+        FILEDATA: { type: oracledb.BUFFER }, 
+      },
+    });
+
+    const rows = result.rows.map((row) => ({
+      INWARDID: row.INWARDID,
+      INWARDNO: row.INWARDNO,
+      SERIALNO: row.SERIALNO,
+      DOCDATE: row.DOCDATE,
+      DOCUMENTNAME: row.DOCUMENTNAME,
+      FILE_BASE64: row.FILEDATA ? row.FILEDATA.toString("base64") : null,
+      FILE_SIZE: row.FILEDATA ? row.FILEDATA.length : 0,
+    }));
+
+    res.json({
+      success: true,
+      data: rows,
+    });
+  } catch (error) {
+    console.error("getExistingDocList error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error("Error closing DB connection:", err);
+      }
+    }
+  }
+};
+
 const AOIO_INWARD_docUpdt = async (req, res) => {
   let connection;
   try {
@@ -729,6 +799,7 @@ module.exports = {
   getInwardDetailsList,
   getInwarListTwo,
   getInwarDocUploadList,
+  getExistingDocList,
   AOIO_INWARD_docUpdt,
   updateInwardDocumentBlobs,
   getInwarListThree,
