@@ -8,6 +8,7 @@ import { useLoader } from "../../Context/LoaderContext";
 import apiService from "../../../apiService";
 import { useAuth } from "../../Context/AuthContext";
 import { useSearchParams } from "react-router-dom";
+import Table from "../../Components/Table";
 
 const getToday = () => {
     const d = new Date();
@@ -44,10 +45,21 @@ const FrmInvardDtlsDocument = () => {
         }
     });
 
+    const [tableHeaders, setTableHeaders] = useState([
+        "अनुक्रमांक",
+        "आवक क्र.",
+        "तारीख",
+        "संदर्भ क्रमांक",
+        "संदर्भ दिनांक",
+        "मोबाईल क्र",
+        "विषय",
+        "पत्राचे प्रकार",
+        "निवडा"
+    ])
     const [tableData, setTableData] = useState([]);
     const [showTable, setShowTable] = useState(false);
 
-    const formatDate = (dateString) => {
+    const formatDateToDDMMMYYYY = (dateString) => {
         const date = new Date(dateString);
 
         const day = String(date.getDate()).padStart(2, "0");
@@ -63,19 +75,31 @@ const FrmInvardDtlsDocument = () => {
         return `${day}-${month}-${year}`;
     };
 
+    const formatDateToDDMMYYYY = (dateString) => {
+    if (!dateString) return "";
+
+    const date = new Date(dateString);
+
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+
+    return `${day}-${month}-${year}`;
+};
+
     const handleSearch = async (data) => {
         try {
             setLoading(true);
-            console.log(data)
+            // console.log(data)
 
 
             const payload = {
-                fromDate: formatDate(data.fromDate),
-                toDate: formatDate(data.toDate),
+                fromDate: formatDateToDDMMMYYYY(data.fromDate),
+                toDate: formatDateToDDMMMYYYY(data.toDate),
                 ulbid,
                 userId
             }
-            const response = await apiService.post("getInwardDetailsList", payload);
+            const response = await apiService.post("getInwarListTwo", payload);
 
             if (response.data.success) {
                 if (response.data.data.length === 0) {
@@ -87,34 +111,37 @@ const FrmInvardDtlsDocument = () => {
                     // const navigateState = mode === 1 ? {
 
                     // }
-                    const formatted = response.data.data.map(item => ({
-                        id: item.id,
-                        number: item.number,
-                        date: item.date,
-                        refno: item.refno,
-                        refdate: item.refdt,
-                        mobileno: item.mobileno,
-                        subject: item.subject,
-                        letterType: item.letterType,
-                        nivda: (
+                    const formatted = response.data.data.map((item, index) => 
+                        (
+                            [
+                        index + 1,
+                        item.INWORD_NO,
+                        item.INWARDDATE ? formatDateToDDMMYYYY(item.INWARDDATE) : "",
+                        item.REF_NO,
+                        item.REF_DATE ? formatDateToDDMMYYYY(item.REF_DATE) : "",
+                        item.MOBILE_NO,
+                        item.SUBJECT,
+                        item.LETTERTYPE,
                             <div className="flex justify-center items-center px-3 py-2">
                                 <button
                                     type="button"
                                     className="p-1.5 rounded-md text-blue-600 border border-blue-300
-            hover:bg-blue-50 active:scale-[0.95] transition-all"
-            onClick={() => {
-                navigate("/Inward/FrmInwardClose", {
-                    state: {
-                        invardNo: item.number,
-                    }
-                })
-            }}
+                                    hover:bg-blue-50 active:scale-[0.95] transition-all"
+                                onClick={() => {
+                                    navigate("/Outward/FrmInwardDocUpload", {
+                                        state: {
+                                            invardNo: item.INWORD_NO,
+                                            row: item,
+                                        }
+                                    });
+                                }}
                                 >
                                     Select
                                 </button>
                             </div>
-                        )
-                    }))
+                        ,
+                            ]  
+                ))
             setTableData(formatted);
             setShowTable(true);
             }
@@ -167,78 +194,11 @@ const FrmInvardDtlsDocument = () => {
                 {showTable &&
                     (
                         <div className="mt-3">
-                            <div className="rounded-xl border border-slate-200 overflow-hidden">
-                                <div className="overflow-x-auto">
-                                    <table className="w-full min-w-[1000px] table-fixed border-collapse">
-                                        <thead className="bg-slate-100/95">
-                                            <tr className="border-b border-slate-200">
-                                                <th className="px-3 py-3 text-left text-[12px] font-bold uppercase tracking-wider text-slate-600">
-                                                    अनुक्रमांक
-                                                </th>
-                                                <th className="px-3 py-3 text-left text-[12px] font-bold uppercase tracking-wider text-slate-600">
-                                                    आवक क्र.
-                                                </th>
-                                                <th className="px-3 py-3 text-left text-[12px] font-bold uppercase tracking-wider text-slate-600">
-                                                    तारीख
-                                                </th>
-                                                <th className="px-3 py-3 text-left text-[12px] font-bold uppercase tracking-wider text-slate-600">
-                                                    संदर्भ क्रमांक
-                                                </th>
-                                                <th className="px-3 py-3 text-left text-[12px] font-bold uppercase tracking-wider text-slate-600">
-                                                    संदर्भ दिनांक
-                                                </th>
-                                                <th className="px-3 py-3 text-left text-[12px] font-bold uppercase tracking-wider text-slate-600">
-                                                    मोबाईल क्र
-                                                </th>
-                                                <th className="px-3 py-3 text-left text-[12px] font-bold uppercase tracking-wider text-slate-600">
-                                                    विषय
-                                                </th>
-                                                <th className="px-3 py-3 text-left text-[12px] font-bold uppercase tracking-wider text-slate-600">
-                                                    पत्राचे प्रकार
-                                                </th>
-                                                <th className="px-3 py-3 text-left text-[12px] font-bold uppercase tracking-wider text-slate-600">
-                                                    निवडा
-                                                </th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            {tableData.length > 0 && (
-                                                tableData.map((item, index) => (
-                                                    <tr>
-                                                        <td className="px-3 py-2 text-center">
-                                                            {index + 1}
-                                                        </td>
-                                                        <td className="px-3 py-2 text-center">
-                                                            {item.number || 0}
-                                                        </td>
-                                                        <td className="px-3 py-2 text-center">
-                                                            {item.date || "-"}
-                                                        </td>
-                                                        <td className="px-3 py-2 text-center">
-                                                            {item.refno || "-"}
-                                                        </td>
-                                                        <td className="px-3 py-2 text-center">
-                                                            {item.refdate || "-"}
-                                                        </td>
-                                                        <td className="px-3 py-2 text-center">
-                                                            {item.mobileno || "-"}
-                                                        </td>
-                                                        <td className="px-3 py-2 text-center">
-                                                            {item.subject || "-"}
-                                                        </td>
-                                                        <td className="px-3 py-2 text-center">
-                                                            {item.letterType || "-"}
-                                                        </td>
-                                                        <td className="px-3 py-2 text-center">
-                                                            {item.nivda || "-"}
-                                                        </td>
-                                                    </tr>
-                                                ))
-                                            )}
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
+                            <Table
+                                headers={tableHeaders}
+                                data={tableData}
+                                rowsPerPage={10}
+                            />
                         </div>
                     )
                 }
