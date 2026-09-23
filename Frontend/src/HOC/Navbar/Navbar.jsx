@@ -108,10 +108,15 @@ const STATIC_MENU = [
       {
         MENUID: 302,
         MENUTITLE: "Inward Close",
-        PAGEPATH: "/Inward/FrmInwardDtls",
+        PAGEPATH: "/Inward/FrmInwardDtlsClose",
       },
       {
         MENUID: 303,
+        MENUTITLE: "आवक दस्तऐवज जोडा",
+        PAGEPATH: "/Inward/FrmInwardDtlsDocument"
+      },
+      {
+        MENUID: 304,
         MENUTITLE: "आवक नोंदणी",
         PAGEPATH: "/Inward/FrmInwardRegister",
       },
