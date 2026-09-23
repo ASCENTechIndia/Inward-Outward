@@ -31,6 +31,7 @@ import FrmInwardClose from "./Pages/Inward/FrmInwardClose.jsx";
 import FrmInwardRegister from "./Pages/Inward/FrmInwardRegister.jsx";
 import FrmInwardRegisterDet from "./Pages/Inward/FrmInwardRegisterDet.jsx";
 import FrmInvardDtlsDocument from "./Pages/Inward/FrmInwardDtlsDocument.jsx";
+import FrmInwardDocUpload from "./Pages/Inward/FrmInwardDocUpload.jsx";
 
 function App() {
   const hostname = window.location.hostname;
@@ -80,6 +81,7 @@ function App() {
                   <Route path="/Inward/FrmInwardClose" element={<FrmInwardClose />} />
                   <Route path="/Inward/FrmInwardRegister" element={<FrmInwardRegister />} />
                   <Route path="/Inward/FrmInwardRegisterDet" element={<FrmInwardRegisterDet />} />
+                  <Route path="/Inward/FrmInwardDocUpload" element={<FrmInwardDocUpload />} />
 
                   {/* Outward */}
                   <Route path="/Outward/FrmOutward" element={<FrmOutward />} />
