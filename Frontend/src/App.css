@@ -1,0 +1,39 @@
+@import "tailwindcss";
+
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  @apply bg-gray-200;
+}
+#report .react-datepicker-wrapper {
+  width: 100%;
+}
+.date-container {
+  z-index: 999;
+}
+.form-input-box {
+  @apply w-full 
+    h-10 
+    px-4 
+    py-2 
+    border 
+    border-gray-500 
+    rounded-md 
+    transition 
+    duration-300 
+    focus:outline-none 
+    focus:border-blue-500 
+    focus:ring-2 
+    focus:ring-blue-200 
+    text-sm 
+    sm:text-base 
+    placeholder-gray-400 
+    shadow-[0_2px_8px_rgba(0,0,0,0.06)] 
+    hover:shadow-[0_4px_12px_rgba(0,0,0,0.08)];
+}
+.react-datepicker-wrapper {
+  width: 100%;
+}

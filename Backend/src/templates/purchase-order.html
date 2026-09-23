@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="mr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>MBMC Letter</title>
+
+    <style>
+        /* body {
+            font-family: "Noto Sans Devanagari", Arial, sans-serif;
+            margin: 0;
+            padding: 30px;
+            background: #f2f2f2;
+        }
+
+        .page {
+            background: #fff;
+            padding: 25px 40px;
+        } */
+
+        @page {
+            size: A4;
+            margin: 15mm;
+        }
+
+        body {
+            font-family: "Noto Sans Devanagari", Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            box-sizing: border-box;
+        }
+
+
+        /* A4 PAGE SETUP */
+        /* @page {
+            size: A4;
+            margin: 20mm;
+        }
+
+        body {
+            font-family: "Noto Sans Devanagari", Arial, sans-serif;
+            background: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+
+   
+        .page {
+            width: 210mm;
+            min-height: 297mm;
+            margin: 20px auto;
+            background: #fff;
+            padding: 15mm;
+            box-sizing: border-box;
+        } */
+
+        /* Remove grey background when printing */
+        /* @media print {
+            body {
+                background: none;
+            }
+
+            .page {
+                margin: 0;
+                width: 100%;
+                min-height: 100%;
+                box-shadow: none;
+            }
+        } */
+
+
+        /* HEADER */
+        .letterhead {
+            border-bottom: 4px double #000;
+            padding-bottom: 10px;
+        }
+
+        .header-container {
+            display: flex;
+            align-items: center;
+        }
+
+        .logo {
+            width: 85px;
+            height: 85px;
+            /* border: 2px solid #000; */
+            margin-right: 20px;
+        }
+
+        .title-section {
+            flex: 1;
+            text-align: center;
+        }
+
+        .title-marathi {
+            font-size: 26px;
+            font-weight: bold;
+        }
+
+        .title-english {
+            font-size: 18px;
+            font-weight: bold;
+            margin-top: 4px;
+        }
+
+        .details {
+            font-size: 13px;
+            margin-top: 6px;
+            line-height: 1.5;
+        }
+
+        .main-office {
+            text-align: center;
+            font-weight: bold;
+            margin-top: 8px;
+        }
+
+        /* BODY SECTION */
+        .content {
+            margin-top: 25px;
+            font-size: 16px;
+            line-height: 1.7;
+        }
+
+        .top-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .address {
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .subject {
+            font-weight: bold;
+            margin: 15px 0;
+            text-align: center;
+        }
+
+        .context {
+            /* text-align: center; */
+            display: flex;
+            justify-content: center;
+            font-weight: bold;
+            align-items: start;
+        }
+
+        .reference-list {
+            margin-left: 25px;
+            margin-top: -1px;
+        }
+
+        .reference-list li {
+            margin-bottom: 6px;
+        }
+
+        .signature {
+    page-break-inside: avoid;
+}
+    </style>
+</head>
+
+<body>
+
+    <div class="page">
+
+        <!-- HEADER -->
+        <div class="letterhead">
+            <div class="header-container">
+                <div class="logo">
+
+                    {{#if logo}}
+                    <img src="{{logo}}" class="logo">
+                    {{/if}}
+                </div>
+
+                <div class="title-section">
+                    <div class="title-marathi">
+                        {{corporationName}}
+                    </div>
+                    <div class="title-english">
+                        {{corporationEName}}
+                    </div>
+
+                    <div class="details">
+                        <strong>कार्यालय : स्व. इंदिरा गांधी भवन, छत्रपती शिवाजी महाराज मार्ग, भाईंदर (प.), ता.जि.ठाणे -
+                            ४०१
+                            १०१</strong><br>
+                        <strong>दूरध्वनी :</strong> 022-28192828 / 2893028 / 28181183 / 28181353 / 28145985<br>
+                        <strong>ईमेल</strong> : mbmcmh@gmail.com &nbsp;&nbsp; <strong>वेबसाइट</strong> : www.mbmc.gov.in
+                    </div>
+
+                    <div class="main-office">
+                        मुख्य कार्यालय
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CONTENT -->
+        <div class="content">
+
+            <div class="top-row">
+                <div>
+                    <strong>ज.क्र.मनपा/साव.आ.वि./{{poNo}}/२०२५-२६</strong>
+                </div>
+                <div>
+                    <strong>दिनांक</strong> : {{currentDate}}
+                </div>
+            </div>
+
+            <div class="address">
+                प्रति,<br>
+                {{vendorName}},<br>
+                {{vendorAddress}}
+            </div>
+
+            <div class="subject">
+                विषय :- महानगरपालिकेच्या सार्वजनिक आरोग्य विभागातील सर्जिकल मटेरियल पुरवठा करणेबाबत.
+            </div>
+
+            <div class="context">
+                <div>
+                    संदर्भ :-
+                </div>
+                <ol class="reference-list">
+                    <li>दि. २३/०२/२०२५ रोजी आपण सादर केलेली निविदा.</li>
+                    <li>प्रशासकीय वाद क्र. ४६४ दिनांक २७/०३/२०२५ रोजीची मंजुरी.</li>
+                    <li>दि. १४/०४/२०२५ रोजी आपल्याशी झालेला करारनामा.</li>
+                    <li>मा. आयुक्त यांची दि. ३०/०९/२०२५ रोजीची मंजुरी.</li>
+                </ol>
+            </div>
+
+        </div>
+
+        <div class="content">
+            <!-- INTRO TEXT -->
+            <div style="margin-top:20px; line-height:1.7;">
+                वरील संदर्भीय विषयानुसार मिरा भाईंदर महानगरपालिकेच्या सार्वजनिक आरोग्य विभागाकरीता आवश्यक सर्जिकल
+                मटेरियल पुरवठा करण्यास मंजूर दरानुसार व करारनाम्याच्या अटी शर्तीप्रमाणे तात्काळ पुरवठा करण्यात यावा.
+            </div>
+
+            <!-- TABLE -->
+            <table style="width:100%; border-collapse:collapse; margin-top:20px; font-size:14px;">
+                <thead>
+                    <tr>
+                        <th style="border:1px solid #000;">S.N.</th>
+                        <th style="border:1px solid #000;">ITEM DESCRIPTION</th>
+                        <th style="border:1px solid #000;">UNITS</th>
+                        <th style="border:1px solid #000;">QTY.</th>
+                        <th style="border:1px solid #000;">RATE</th>
+                        <th style="border:1px solid #000;">AMOUNT</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each items}}
+                    <tr>
+                        <td style="border:1px solid #000; text-align:center;">{{categoryId}}</td>
+                        <td style="border:1px solid #000; text-align: center;">{{name}}</td>
+                        <td style="border:1px solid #000; text-align:center;">1 X 1</td>
+                        <td style="border:1px solid #000; text-align:center;">{{qty}}</td>
+                        <td style="border:1px solid #000; text-align:center;">{{price}}</td>
+                        <td style="border:1px solid #000; text-align:center;">{{total}}</td>
+                    </tr>
+                    {{/each}}
+                    <!-- <tr>
+                        <td style="border:1px solid #000; text-align:center;">488</td>
+                        <td style="border:1px solid #000;">ABJEL</td>
+                        <td style="border:1px solid #000; text-align:center;">1 X 1</td>
+                        <td style="border:1px solid #000; text-align:right;">240</td>
+                        <td style="border:1px solid #000; text-align:right;">300</td>
+                        <td style="border:1px solid #000; text-align:right;">72000</td>
+                    </tr>
+                    <tr>
+                        <td style="border:1px solid #000; text-align:center;">491</td>
+                        <td style="border:1px solid #000;">AIR WAYS - 1 TO 3 NO. (5 EACH)</td>
+                        <td style="border:1px solid #000; text-align:center;">1 X 1</td>
+                        <td style="border:1px solid #000; text-align:right;">23.48</td>
+                        <td style="border:1px solid #000; text-align:right;">15</td>
+                        <td style="border:1px solid #000; text-align:right;">352.2</td>
+                    </tr>
+                    <tr>
+                        <td style="border:1px solid #000; text-align:center;">507</td>
+                        <td style="border:1px solid #000;">B P COUGH ADULT</td>
+                        <td style="border:1px solid #000; text-align:center;">1 X 1</td>
+                        <td style="border:1px solid #000; text-align:right;">340</td>
+                        <td style="border:1px solid #000; text-align:right;">20</td>
+                        <td style="border:1px solid #000; text-align:right;">6800</td>
+                    </tr>
+                    <tr>
+                        <td style="border:1px solid #000; text-align:center;">645</td>
+                        <td style="border:1px solid #000;">FRIDGE (253 LTR) DOUBLE DOOR</td>
+                        <td style="border:1px solid #000; text-align:center;">1 X 1</td>
+                        <td style="border:1px solid #000; text-align:right;">45000</td>
+                        <td style="border:1px solid #000; text-align:right;">25</td>
+                        <td style="border:1px solid #000; text-align:right;">1125000</td>
+                    </tr>
+                    <tr>
+                        <td style="border:1px solid #000; text-align:center;">726</td>
+                        <td style="border:1px solid #000;">NEEDLE NO. 26 - BD</td>
+                        <td style="border:1px solid #000; text-align:center;">1 X 1</td>
+                        <td style="border:1px solid #000; text-align:right;">2.55</td>
+                        <td style="border:1px solid #000; text-align:right;">2000</td>
+                        <td style="border:1px solid #000; text-align:right;">5100</td>
+                    </tr>
+                    <tr>
+                        <td style="border:1px solid #000; text-align:center;">746</td>
+                        <td style="border:1px solid #000;">PATIENT OT SOAK PAD</td>
+                        <td style="border:1px solid #000; text-align:center;">1 X 1</td>
+                        <td style="border:1px solid #000; text-align:right;">59</td>
+                        <td style="border:1px solid #000; text-align:right;">2000</td>
+                        <td style="border:1px solid #000; text-align:right;">118000</td>
+                    </tr>
+                    <tr>
+                        <td style="border:1px solid #000; text-align:center;">795</td>
+                        <td style="border:1px solid #000;">SHAVING KIT BLADE - GALLANT BLADE</td>
+                        <td style="border:1px solid #000; text-align:center;">1 X 1</td>
+                        <td style="border:1px solid #000; text-align:right;">38</td>
+                        <td style="border:1px solid #000; text-align:right;">2000</td>
+                        <td style="border:1px solid #000; text-align:right;">76000</td>
+                    </tr>
+                    <tr>
+                        <td style="border:1px solid #000; text-align:center;">865</td>
+                        <td style="border:1px solid #000;">VEINFLOW 20</td>
+                        <td style="border:1px solid #000; text-align:center;">1 X 1</td>
+                        <td style="border:1px solid #000; text-align:right;">13.2</td>
+                        <td style="border:1px solid #000; text-align:right;">2000</td>
+                        <td style="border:1px solid #000; text-align:right;">26400</td>
+                    </tr>
+                    <tr>
+                        <td style="border:1px solid #000; text-align:center;">866</td>
+                        <td style="border:1px solid #000;">VEINFLOW 22</td>
+                        <td style="border:1px solid #000; text-align:center;">1 X 1</td>
+                        <td style="border:1px solid #000; text-align:right;">13.2</td>
+                        <td style="border:1px solid #000; text-align:right;">2000</td>
+                        <td style="border:1px solid #000; text-align:right;">26400</td>
+                    </tr> -->
+
+                    <!-- TOTAL ROW -->
+                    <tr>
+                        <td style="border:1px solid #000; text-align:center; font-weight: bold;">TOTAL</td>
+                        <td colspan="2" style="border:1px solid #000;"></td>
+                        <!-- <td style="border:1px solid #000; text-align:center;"></td> -->
+                        <td style="border:1px solid #000; text-align:center;"></td>
+                        <td style="border:1px solid #000; text-align:center;"></td>
+                        <td style="border:1px solid #000; text-align:center; font-weight: bold;">{{totalAmount}}</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- INSTRUCTIONS -->
+            <ol style="margin-top:25px; line-height:1.8;">
+                <li>वरील सर्जिकल मटेरियल पुरवठा त्वरीत करावा.</li>
+                <li>त्वरीत पुरवठा न झाल्यास म. न. पा. तातडीची आवश्यकता असल्यास दुसऱ्या क्रमांकाच्या निविदाधारकाकडून
+                    खरेदी करण्यात येईल व फरकाची रक्कम आपल्या देयकातून/अनामत रकमेतून कपात करण्यात येईल.</li>
+                <li>सर्जिकल मटेरियल पुरवठा करताना सोबत तीन प्रती चलन व बिल सादर करावे.</li>
+            </ol>
+
+            <!-- SIGNATURE -->
+            <div class="signature" style="margin-top:60px; text-align:right;">
+                <strong>(कविता बोकर)</strong><br>
+                <strong>उपआयुक्त (सार्व.आ.वि.)</strong><br>
+                <strong>मिरा भाईंदर महानगरपालिका</strong>
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
