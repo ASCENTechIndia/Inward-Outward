@@ -394,6 +394,71 @@ const getInwardDetailsList = async (req, res) => {
   }
 };
 
+const getInwarListTwo = async (req, res) => {
+  let connection;
+  try {
+    const { userId, ulbid, fromDate, toDate } = req.body;
+    if (!userId) {
+      return res.json({ success: false, errorMessage: "UserId is required" });
+    }
+    if (!ulbid) {
+      return res.json({ success: false, errorMessage: "UserId is required" });
+    }
+    if (!fromDate) {
+      return res.json({
+        success: false,
+        errorMessage: "From Date is required",
+      });
+    }
+    if (!toDate) {
+      return res.json({ success: false, errorMessage: "To Date is required" });
+    }
+    connection = await getConnection();
+    const query = `SELECT DISTINCT
+            aim.num_iinward_ulbid       AS ulbid,
+            aim.num_inward_inwardid     AS inwardid,
+            aim.num_inward_inwardno     AS inword_no,
+            AIM.date_inward_inwdate     AS inwarddate,
+            AIM.var_inward_refno        AS ref_no,
+            AIM.date_inward_refdate     AS ref_date,
+            AIM.num_inward_mobile       AS mobile_no,
+            AIM.var_inward_subject      AS subject,
+            var_lettertype_type         AS LetterType
+      FROM   aoio_inward_mas aim
+      INNER  JOIN aoio_lettertype_det 
+              ON num_lettertype_id = var_inward_lettertype
+      WHERE  num_iinward_ulbid       = :ulbid
+        AND  var_inward_insby        = :userId
+        AND  TRUNC(date_inward_inwdate) >= :fromDate
+        AND  TRUNC(date_inward_inwdate) <= :toDate`;
+
+    const bind = {
+      fromDate,
+      toDate,
+      ulbid: Number(ulbid),
+      userId,
+    };
+    const result = await connection.execute(query, bind, {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+    });
+    res.json({
+      success: true,
+      data: result.rows || [],
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error("Error closing DB connection:", err);
+      }
+    }
+  }
+};
+
 module.exports = {
   getSendersDropdown,
   getSubTypesDropdown,
@@ -403,4 +468,5 @@ module.exports = {
   aoio_inward_ins,
   insertInwardDocuments,
   getInwardDetailsList,
+  getInwarListTwo,
 };

@@ -8,6 +8,7 @@ const {
   aoio_inward_ins,
   insertInwardDocuments,
   getInwardDetailsList,
+  getInwarListTwo,
 } = require("../../controllers/InwardOutward/inwardController");
 const { validate } = require("../../validators/validate");
 const {
@@ -25,5 +26,6 @@ router.post("/getDesigDropdown", getMarathiDepartmentDropdown);
 router.post("/aoio_inward_ins", validate(aoioInwardInsSchema), aoio_inward_ins);
 router.post("/insertInwardDocuments", insertInwardDocuments);
 router.post("/getInwardDetailsList", getInwardDetailsList);
+router.post("/getInwarListTwo", getInwarListTwo);
 
 module.exports = router;
