@@ -26,10 +26,11 @@ import FrmSenderTypeConfig from "./Pages/Configuration/FrmSenderTypeConfig.jsx";
 import FrmOutWardUserConfig from "./Pages/Configuration/FrmOutWardUserConfig.jsx";
 import FrmOutward from "./Pages/Outward/FrmOutward.jsx";
 import FrmInvardMst from "./Pages/Inward/FrmInvardMst.jsx";
-import FrmInvardDtls from "./Pages/Inward/FrmInvardDtls.jsx";
+import FrmInvardDtlsClose from "./Pages/Inward/FrmInvardDtlsClose.jsx";
 import FrmInwardClose from "./Pages/Inward/FrmInwardClose.jsx";
 import FrmInwardRegister from "./Pages/Inward/FrmInwardRegister.jsx";
 import FrmInwardRegisterDet from "./Pages/Inward/FrmInwardRegisterDet.jsx";
+import FrmInvardDtlsDocument from "./Pages/Inward/FrmInwardDtlsDocument.jsx";
 
 function App() {
   const hostname = window.location.hostname;
@@ -74,7 +75,8 @@ function App() {
 
                   {/* Inward */}
                   <Route path="/Inward/FrmInwardMst" element={<FrmInvardMst />} />
-                  <Route path="/Inward/FrmInwardDtls" element={<FrmInvardDtls />} />
+                  <Route path="/Inward/FrmInwardDtlsClose" element={<FrmInvardDtlsClose />} />
+                  <Route path="/Inward/FrmInwardDtlsDocument" element={<FrmInvardDtlsDocument />} />
                   <Route path="/Inward/FrmInwardClose" element={<FrmInwardClose />} />
                   <Route path="/Inward/FrmInwardRegister" element={<FrmInwardRegister />} />
                   <Route path="/Inward/FrmInwardRegisterDet" element={<FrmInwardRegisterDet />} />

@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useForm, useFieldArray } from "react-hook-form";
 import Layout from "../../Components/Layout";
 import Label from "../../Components/Label";
@@ -7,6 +7,7 @@ import Button from "../../Components/Button";
 import { useLoader } from "../../Context/LoaderContext";
 import apiService from "../../../apiService";
 import { useAuth } from "../../Context/AuthContext";
+import { useSearchParams } from "react-router-dom";
 
 const getToday = () => {
     const d = new Date();
@@ -15,12 +16,18 @@ const getToday = () => {
     return `${d.getFullYear()}-${month}-${day}`;
 };
 
-const FrmInvardDtls = () => {
+const FrmInvardDtlsClose = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    const [ searchParams ] = useSearchParams();
     const { setLoading } = useLoader();
     const { user } = useAuth();
     const userId = user?.userId;
     const ulbid = user?.ulbId;
+    // const mode = searchParams.get("mode");
+    // console.log(mode);
+    // console.log(userId);
+    // console.log(ulbid);
 
     const {
         register,
@@ -40,50 +47,77 @@ const FrmInvardDtls = () => {
     const [tableData, setTableData] = useState([]);
     const [showTable, setShowTable] = useState(false);
 
-    const handleSearch = async () => {
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+
+        const day = String(date.getDate()).padStart(2, "0");
+
+        const months = [
+            "JAN", "FEB", "MAR", "APR", "MAY", "JUN",
+            "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"
+        ];
+
+        const month = months[date.getMonth()];
+        const year = date.getFullYear();
+
+        return `${day}-${month}-${year}`;
+    };
+
+    const handleSearch = async (data) => {
         try {
             setLoading(true);
+            console.log(data)
 
-            // const response = await apiService.post("", payload);
 
-            // if (response.success) {
-            // if (Response.data.data.length === 0) {
-            //     alert("No Records Found");
-            //     setShowTable(false);
-            //     return;
-            // }
+            const payload = {
+                fromDate: formatDate(data.fromDate),
+                toDate: formatDate(data.toDate),
+                ulbid,
+                userId
+            }
+            const response = await apiService.post("getInwardDetailsList", payload);
 
-            //         const formatted = Response.data.data.map(item => ({
-            //             id: item.id,
-            //             number: item.number,
-            //             date: item.date,
-            //             refno: item.refno,
-            //             refdate: item.refdt,
-            //             mobileno: item.mobileno,
-            //             subject: item.subject,
-            //             letterType: item.letterType,
-            //             nivda: (
-            //                 <div className="flex justify-center items-center px-3 py-2">
-            //                     <button
-            //                         type="button"
-            //                         className="p-1.5 rounded-md text-blue-600 border border-blue-300
-            // hover:bg-blue-50 active:scale-[0.95] transition-all"
-            // onClick={() => {
-            //     navigate("/Inward/FrmInwardClose", {
-            //         state: {
-            //             invardNo: item.number,
-            //         }
-            //     })
-            // }}
-            //                     >
-            //                         Select
-            //                     </button>
-            //                 </div>
-            //             )
-            //         }))
-            // setTableData(formatted);
-            // setShowTable(true);
-            // }
+            if (response.data.success) {
+                if (response.data.data.length === 0) {
+                    alert("No Records Found");
+                    setShowTable(false);
+                    return;
+                }
+                    // const navigateToURL = mode === 1 ? "/Inward/FrmInwardClose" : mode === 2 ? "" : "";
+                    // const navigateState = mode === 1 ? {
+
+                    // }
+                    const formatted = response.data.data.map(item => ({
+                        id: item.id,
+                        number: item.number,
+                        date: item.date,
+                        refno: item.refno,
+                        refdate: item.refdt,
+                        mobileno: item.mobileno,
+                        subject: item.subject,
+                        letterType: item.letterType,
+                        nivda: (
+                            <div className="flex justify-center items-center px-3 py-2">
+                                <button
+                                    type="button"
+                                    className="p-1.5 rounded-md text-blue-600 border border-blue-300
+            hover:bg-blue-50 active:scale-[0.95] transition-all"
+            onClick={() => {
+                navigate("/Inward/FrmInwardClose", {
+                    state: {
+                        invardNo: item.number,
+                    }
+                })
+            }}
+                                >
+                                    Select
+                                </button>
+                            </div>
+                        )
+                    }))
+            setTableData(formatted);
+            setShowTable(true);
+            }
 
         } catch (error) {
             console.error(error);
@@ -215,4 +249,4 @@ const FrmInvardDtls = () => {
 
 }
 
-export default FrmInvardDtls;
+export default FrmInvardDtlsClose;
