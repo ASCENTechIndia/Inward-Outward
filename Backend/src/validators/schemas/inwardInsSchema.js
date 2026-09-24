@@ -290,3 +290,51 @@ export const updateInwardDocumentBlobsSchema = z.object({
     )
     .min(1, "At least one document is required"),
 });
+
+export const inwardTransferInsSchema = z.object({
+  IN_USERID: z
+    .string({
+      required_error: "UserId is required",
+      invalid_type_error: "UserId must be a string",
+    })
+    .trim()
+    .min(1, "UserId is required"),
+
+  IN_inwardid: z
+    .number({
+      required_error: "Inward Id is required",
+      invalid_type_error: "Inward Id must be a number",
+    })
+    .int("Inward Id must be an integer"),
+
+  IN_INWARDNO: z
+    .string({
+      required_error: "Inward No is required",
+      invalid_type_error: "Inward No must be a string",
+    })
+    .trim()
+    .min(1, "Inward No is required"),
+
+  in_ipaddress: z
+    .string({
+      required_error: "IP address is required",
+      invalid_type_error: "IP address must be a string",
+    })
+    .trim()
+    .min(1, "IP address is required"),
+
+  in_trfstr: z
+    .string({
+      required_error: "Transfer string is required",
+      invalid_type_error: "Transfer string must be a string",
+    })
+    .trim()
+    .min(1, "Transfer string is required"),
+
+  ulbid: z
+    .number({
+      required_error: "Ulb Id is required",
+      invalid_type_error: "Ulb Id must be a number",
+    })
+    .int("Ulb Id must be an integer"),
+});
