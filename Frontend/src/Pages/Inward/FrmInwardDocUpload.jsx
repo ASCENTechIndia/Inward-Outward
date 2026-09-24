@@ -254,10 +254,92 @@ const FrmInwardDocUpload = () => {
         </button>,
     ]);
 
+    const normalizeBase64 = (value) => {
+        if (!value) {
+            throw new Error("Empty Base64 value");
+        }
+
+        let base64 = String(value).trim();
+
+        // -----------------------------------------
+        // 1. Standard Data URL
+        // data:application/pdf;base64,JVBERi0...
+        // -----------------------------------------
+        if (base64.startsWith("data:")) {
+            const commaIndex = base64.indexOf(",");
+
+            if (commaIndex === -1) {
+                throw new Error("Invalid Data URL");
+            }
+
+            base64 = base64.substring(commaIndex + 1);
+        }
+
+        // -----------------------------------------
+        // 2. Your API format
+        // dataapplication/pdfbase64JVBERi0...
+        // dataimage/pngbase64iVBORw0...
+        // -----------------------------------------
+        else if (base64.startsWith("data")) {
+            const match = base64.match(
+                /^data([a-zA-Z0-9.+-]+\/[a-zA-Z0-9.+-]+)base64/
+            );
+
+            if (match) {
+                base64 = base64.substring(match[0].length);
+            }
+        }
+
+        // Remove whitespace/newlines
+        base64 = base64.replace(/\s/g, "");
+
+        // Remove accidental quotes
+        base64 = base64.replace(/^["']|["']$/g, "");
+
+        // Convert Base64URL → Base64
+        base64 = base64
+            .replace(/-/g, "+")
+            .replace(/_/g, "/");
+
+        // Validate characters
+        if (!/^[A-Za-z0-9+/]*={0,2}$/.test(base64)) {
+            console.error(
+                "Invalid Base64:",
+                base64.substring(0, 100)
+            );
+
+            throw new Error("Invalid Base64 characters");
+        }
+
+        // Remove existing padding
+        base64 = base64.replace(/=+$/, "");
+
+        // Validate length
+        const remainder = base64.length % 4;
+
+        if (remainder === 1) {
+            throw new Error(
+                `Invalid Base64 length: ${base64.length}`
+            );
+        }
+
+        // Add padding
+        if (remainder > 0) {
+            base64 += "=".repeat(4 - remainder);
+        }
+
+        return base64;
+    };
+
     const handleDocumentView = (doc) => {
         try {
-            if (doc.file) {
+            // -----------------------------------------
+            // 1. Newly uploaded File
+            // -----------------------------------------
+          
+            if (doc.file instanceof File) {
                 const fileUrl = URL.createObjectURL(doc.file);
+
                 window.open(fileUrl, "_blank");
 
                 setTimeout(() => {
@@ -267,35 +349,176 @@ const FrmInwardDocUpload = () => {
                 return;
             }
 
-            if (doc.base64) {
-                const byteCharacters = atob(doc.base64);
-                const byteNumbers = new Array(byteCharacters.length);
+            // -----------------------------------------
+            // 2. Existing API document
+            // -----------------------------------------
+            if (!doc.base64) {
+                alert("Document उपलब्ध नाही.");
+                return;
+            }
 
-                for (let i = 0; i < byteCharacters.length; i++) {
-                    byteNumbers[i] = byteCharacters.charCodeAt(i);
+            const rawBase64 = String(doc.base64).trim();
+
+            if (!rawBase64) {
+                alert("Document data रिकामा आहे.");
+                return;
+            }
+
+            let mimeType = "application/octet-stream";
+
+            // -----------------------------------------
+            // 3. Detect MIME type
+            // -----------------------------------------
+
+            if (rawBase64.startsWith("data:")) {
+                const mimeMatch = rawBase64.match(
+                    /^data:([^;,]+)/
+                );
+
+                if (mimeMatch) {
+                    mimeType = mimeMatch[1];
+                }
+            } else if (rawBase64.startsWith("data")) {
+                const mimeMatch = rawBase64.match(
+                    /^data([a-zA-Z0-9.+-]+\/[a-zA-Z0-9.+-]+)base64/
+                );
+
+                if (mimeMatch) {
+                    mimeType = mimeMatch[1];
+                }
+            }
+
+
+            // -----------------------------------------
+            // 4. Normalize Base64
+            // -----------------------------------------
+
+            const base64 = normalizeBase64(rawBase64);
+
+            if (!base64) {
+                alert("Document Base64 data उपलब्ध नाही.");
+                return;
+            }
+
+            // -----------------------------------------
+            // 5. Validate Base64 length
+            // -----------------------------------------
+
+            if (base64.length % 4 !== 0) {
+                alert(
+                    "Document data incomplete आहे. कृपया पुन्हा try करा."
+                );
+                return;
+            }
+
+            // -----------------------------------------
+            // 6. Validate Base64 characters
+            // -----------------------------------------
+
+            if (!/^[A-Za-z0-9+/]*={0,2}$/.test(base64)) {
+                alert(
+                    "Document Base64 format invalid किंवा incomplete आहे."
+                );
+                return;
+            }
+
+            // -----------------------------------------
+            // 7. Decode Base64
+            // -----------------------------------------
+
+            let byteCharacters;
+
+            try {
+                byteCharacters = atob(base64);
+            } catch (error) {
+                console.error("Base64 decode error:", error);
+
+                alert(
+                    "Document data incomplete किंवा invalid Base64 format मध्ये आहे."
+                );
+
+                return;
+            }
+
+            // -----------------------------------------
+            // 8. Convert to bytes
+            // -----------------------------------------
+
+            const byteArray = Uint8Array.from(
+                byteCharacters,
+                (char) => char.charCodeAt(0)
+            );
+
+            // -----------------------------------------
+            // 9. Detect file type from signature
+            // -----------------------------------------
+
+            if (base64.startsWith("JVBERi0")) {
+                mimeType = "application/pdf";
+            } else if (base64.startsWith("iVBORw0KGgo")) {
+                mimeType = "image/png";
+            } else if (base64.startsWith("/9j/")) {
+                mimeType = "image/jpeg";
+            } else if (base64.startsWith("R0lGOD")) {
+                mimeType = "image/gif";
+            }
+
+            // -----------------------------------------
+            // 10. Validate PDF completeness
+            // -----------------------------------------
+
+            if (mimeType === "application/pdf") {
+                const pdfText = new TextDecoder("latin1").decode(
+                    byteArray
+                );
+
+                // PDF must start with %PDF
+                if (!pdfText.startsWith("%PDF")) {
+                    alert(
+                        "PDF document invalid किंवा incomplete आहे."
+                    );
+                    return;
                 }
 
-                const byteArray = new Uint8Array(byteNumbers);
-
-                const blob = new Blob([byteArray], {
-                    type: "application/pdf",
-                });
-
-                const fileUrl = URL.createObjectURL(blob);
-
-                window.open(fileUrl, "_blank");
-
-                setTimeout(() => {
-                    URL.revokeObjectURL(fileUrl);
-                }, 60000);
-
-                return;
+                // PDF normally ends with %%EOF
+                if (!pdfText.includes("%%EOF")) {
+                    alert(
+                        "PDF document incomplete आहे. कृपया document पुन्हा upload करा."
+                    );
+                    return;
+                }
             }
 
-            alert("Document उपलब्ध नाही.");
+            console.log("MIME:", mimeType);
+            console.log("Base64 length:", base64.length);
+            console.log("Decoded bytes:", byteArray.length);
+
+            // -----------------------------------------
+            // 11. Create Blob
+            // -----------------------------------------
+
+            const blob = new Blob([byteArray], {
+                type: mimeType,
+            });
+
+            // -----------------------------------------
+            // 12. Open document
+            // -----------------------------------------
+
+            const fileUrl = URL.createObjectURL(blob);
+
+            window.open(fileUrl, "_blank");
+
+            setTimeout(() => {
+                URL.revokeObjectURL(fileUrl);
+            }, 60000);
+
         } catch (error) {
             console.error("Error viewing document:", error);
-            alert("Document उघडताना error आला.");
+
+            alert(
+                "Document उघडताना error आला. Document data incomplete किंवा invalid आहे."
+            );
         }
     };
 
