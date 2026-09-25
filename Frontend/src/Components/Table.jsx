@@ -6,7 +6,7 @@ const Table = ({
   headerlabel,
   columnStyles = [],
   showUpload = false,
-  onFileUpload = () => {},
+  onFileUpload = () => { },
   rowsPerPage = 10,
   showSearch = true,
 }) => {
@@ -159,7 +159,7 @@ const Table = ({
         {/* ---------- Table ---------- */}
         <div className="w-full overflow-x-auto">
           <div className="max-h-96 overflow-y-auto">
-            <table className="w-full table-fixed border-collapse">
+            <table className="min-w-[1000px] w-full border-collapse">
               <thead className="sticky top-0 z-10 bg-slate-100/95 backdrop-blur-sm">
                 <tr className="border-b border-slate-200">
                   {headers.map((header, idx) => (
@@ -245,10 +245,9 @@ const Table = ({
                   onClick={() => handlePageChange(currentPage - 1)}
                   disabled={currentPage === 1}
                   className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all
-                    ${
-                      currentPage === 1
-                        ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                        : "bg-white text-slate-700 border border-slate-300 hover:bg-slate-100 active:scale-[0.97]"
+                    ${currentPage === 1
+                      ? "bg-slate-100 text-slate-400 cursor-not-allowed"
+                      : "bg-white text-slate-700 border border-slate-300 hover:bg-slate-100 active:scale-[0.97]"
                     }`}
                 >
                   Prev
@@ -269,10 +268,9 @@ const Table = ({
                         key={page}
                         onClick={() => handlePageChange(page)}
                         className={`min-w-[34px] h-8 rounded-md text-sm font-medium transition-all
-                          ${
-                            currentPage === page
-                              ? "bg-blue-600 text-white shadow-sm"
-                              : "bg-white text-slate-700 border border-slate-300 hover:bg-slate-100 active:scale-[0.97]"
+                          ${currentPage === page
+                            ? "bg-blue-600 text-white shadow-sm"
+                            : "bg-white text-slate-700 border border-slate-300 hover:bg-slate-100 active:scale-[0.97]"
                           }`}
                       >
                         {page}
@@ -291,10 +289,9 @@ const Table = ({
                   onClick={() => handlePageChange(currentPage + 1)}
                   disabled={currentPage === totalPages}
                   className={`px-3 py-1.5 rounded-md text-sm font-medium transition-all
-                    ${
-                      currentPage === totalPages
-                        ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                        : "bg-white text-slate-700 border border-slate-300 hover:bg-slate-100 active:scale-[0.97]"
+                    ${currentPage === totalPages
+                      ? "bg-slate-100 text-slate-400 cursor-not-allowed"
+                      : "bg-white text-slate-700 border border-slate-300 hover:bg-slate-100 active:scale-[0.97]"
                     }`}
                 >
                   Next

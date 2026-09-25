@@ -65,6 +65,14 @@ const toOptions = (res, valueKey, labelKey) => {
   return [];
 };
 
+const getToday = () => {
+  const d = new Date();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${month}-${day}`;
+};
+
+
 const FrmInwardRegRpt = () => {
   const { user } = useAuth();
   const ulbid = user?.ulbId;
@@ -80,6 +88,9 @@ const FrmInwardRegRpt = () => {
   const [docTypeOptions, setDocTypeOptions] = useState([]);
   const [docSubTypeOptions, setDocSubTypeOptions] = useState([]);
 
+  const [ulbLogo, setUlbLogo] = useState("");
+  const [municipalText, setMunicipalText ] = useState("");
+
   // ================= REPORT DATA =================
   const [tableData, setTableData] = useState([]);
 
@@ -94,8 +105,8 @@ const FrmInwardRegRpt = () => {
     defaultValues: {
       reportType: "",
       includeDateFilter: false,
-      fromDate: "",
-      toDate: "",
+      fromDate: getToday(),
+      toDate: getToday(),
       deptId: "",
       empId: "",
       senderId: "",
@@ -108,8 +119,8 @@ const FrmInwardRegRpt = () => {
   const watchReportType = watch("reportType");
   const watchIncludeDate = watch("includeDateFilter");
   const watchSender = watch("senderId");
-  const watchFromDate = watch("fromDate");   
-  const watchToDate = watch("toDate");       
+  const watchFromDate = watch("fromDate");
+  const watchToDate = watch("toDate");
 
   // ================= CHECKBOX BEHAVIOR =================
   useEffect(() => {
@@ -205,7 +216,7 @@ const FrmInwardRegRpt = () => {
           senderId: Number(watchSender),
         });
         setSenderSubTypeOptions(
-          toOptions(res, "NUM_SENDERSUBTYPE_ID", "SENDERSUBTYPENAME"),
+          toOptions(res, "SENDSUBID", "VAR_SENDERSUBTYPE_NAME"),
         );
       } catch (err) {
         console.error("Subtype load error:", err);
@@ -214,6 +225,25 @@ const FrmInwardRegRpt = () => {
 
     fetchSubTypes();
   }, [watchSender, ulbid]);
+
+  const fetchLogoAndMunicipal = async () => {
+    try {
+      setLoading(true);
+
+      const response = await apiService.post("textlogo", {
+        "ulbId": Number(ulbid)
+      });
+
+      if (response.data.success) {
+        setUlbLogo(response?.data?.data?.ULBLOGO);
+        setMunicipalText(response?.data?.data?.ABC_MUNICIPAL_TEXT)
+      } 
+    } catch (error) {
+      console.error(error);
+    } finally { 
+      setLoading(false);
+    }
+  }
 
   // ================= SUBMIT =================
   const onSubmit = async (data) => {
@@ -349,6 +379,12 @@ const FrmInwardRegRpt = () => {
     watchReportType === "1" && watchFromDate && watchToDate
       ? `${formatDisplayDate(watchFromDate)} ते ${formatDisplayDate(watchToDate)}`
       : "";
+
+  useEffect(() => {
+    if (ulbid) {
+      fetchLogoAndMunicipal();
+    }
+  }, [ulbid]);
 
   return (
     <Layout
@@ -527,9 +563,8 @@ const FrmInwardRegRpt = () => {
             <input
               type="date"
               disabled={datesDisabled}
-              className={`form-input-box ${
-                datesDisabled ? "bg-slate-100 cursor-not-allowed" : ""
-              }`}
+              className={`form-input-box ${datesDisabled ? "bg-slate-100 cursor-not-allowed" : ""
+                }`}
               {...register("fromDate")}
             />
           </div>
@@ -539,9 +574,8 @@ const FrmInwardRegRpt = () => {
             <input
               type="date"
               disabled={datesDisabled}
-              className={`form-input-box ${
-                datesDisabled ? "bg-slate-100 cursor-not-allowed" : ""
-              }`}
+              className={`form-input-box ${datesDisabled ? "bg-slate-100 cursor-not-allowed" : ""
+                }`}
               {...register("toDate")}
             />
           </div>
@@ -577,8 +611,8 @@ const FrmInwardRegRpt = () => {
                 fileName={`InwardRegister_${new Date()
                   .toISOString()
                   .slice(0, 10)}.pdf`}
-                ulbName={user?.ulbName || "Municipal Corporation"}
-                logoUrl={user?.ulbLogo || ""}
+                ulbName={municipalText|| "Municipal Corporation"}
+                logoUrl={ulbLogo || ""}
                 reportTitle="आवक रजिस्टर"
                 dateRange={dateRangeText}
                 userName={user?.username || ""}

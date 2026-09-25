@@ -128,7 +128,7 @@ const FrmInvardDtlsCommunication = () => {
                                 className="p-1.5 rounded-md text-blue-600 border border-blue-300
                                     hover:bg-blue-50 active:scale-[0.95] transition-all"
                                 onClick={() => {
-                                    navigate("/Inward/FrmInwardDocUpload", {
+                                    navigate("/Inward/FrmInwardTransfer", {
                                         state: {
                                             invardNo: item.INWORD_NO,
                                             row: item,
