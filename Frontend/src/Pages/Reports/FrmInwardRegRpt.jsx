@@ -33,7 +33,7 @@ const formatDisplayDate = (dateStr) => {
   return `${day}-${month}-${d.getFullYear()}`;
 };
 
-// Table column headers (matches .NET GridView)
+
 const reportHeaders = [
   "अनुक्रमांक.",
   "आवक क्र.",
@@ -80,7 +80,6 @@ const FrmInwardRegRpt = () => {
   const userDesigId = user?.desigId;
   const { setLoading } = useLoader();
 
-  // ================= DROPDOWN OPTIONS =================
   const [deptOptions, setDeptOptions] = useState([]);
   const [empOptions, setEmpOptions] = useState([]);
   const [senderOptions, setSenderOptions] = useState([]);
@@ -91,7 +90,7 @@ const FrmInwardRegRpt = () => {
   const [ulbLogo, setUlbLogo] = useState("");
   const [municipalText, setMunicipalText ] = useState("");
 
-  // ================= REPORT DATA =================
+  
   const [tableData, setTableData] = useState([]);
 
   const {
@@ -122,7 +121,7 @@ const FrmInwardRegRpt = () => {
   const watchFromDate = watch("fromDate");
   const watchToDate = watch("toDate");
 
-  // ================= CHECKBOX BEHAVIOR =================
+
   useEffect(() => {
     if (watchReportType === "1") {
       setValue("includeDateFilter", true);
@@ -135,7 +134,7 @@ const FrmInwardRegRpt = () => {
   const checkboxChecked = watchReportType === "1" || watchIncludeDate === true;
   const datesDisabled = !(watchReportType === "1" || watchIncludeDate === true);
 
-  // ================= RESET CONDITIONAL FIELDS ON TYPE CHANGE =================
+
   useEffect(() => {
     setValue("deptId", "");
     setValue("empId", "");
@@ -147,7 +146,7 @@ const FrmInwardRegRpt = () => {
     setTableData([]);
   }, [watchReportType, setValue]);
 
-  // ================= LOAD DROPDOWNS BASED ON REPORT TYPE =================
+  
   useEffect(() => {
     if (!ulbid || !watchReportType) return;
 
@@ -202,7 +201,7 @@ const FrmInwardRegRpt = () => {
     loadDropdowns();
   }, [watchReportType, ulbid, userDeptId, userDesigId, setLoading]);
 
-  // ================= SENDER CHANGE → LOAD SUBTYPES =================
+
   useEffect(() => {
     if (!watchSender || !ulbid) {
       setSenderSubTypeOptions([]);
@@ -245,7 +244,7 @@ const FrmInwardRegRpt = () => {
     }
   }
 
-  // ================= SUBMIT =================
+
   const onSubmit = async (data) => {
     if (!ulbid) {
       alert("UlbId is not set");
@@ -257,7 +256,7 @@ const FrmInwardRegRpt = () => {
       return;
     }
 
-    // Report type specific validations
+   
     if (data.reportType === "2" && !data.deptId) {
       alert("कृपया विभाग निवडा");
       return;
@@ -351,7 +350,7 @@ const FrmInwardRegRpt = () => {
     }
   };
 
-  // ================= RESET =================
+ 
   const handleReset = () => {
     reset({
       reportType: "",
@@ -374,7 +373,7 @@ const FrmInwardRegRpt = () => {
     setDocSubTypeOptions([]);
   };
 
-  // ================= DATE RANGE STRING FOR PDF =================
+
   const dateRangeText =
     watchReportType === "1" && watchFromDate && watchToDate
       ? `${formatDisplayDate(watchFromDate)} ते ${formatDisplayDate(watchToDate)}`
@@ -396,9 +395,9 @@ const FrmInwardRegRpt = () => {
       }}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-4">
-        {/* ============ Report Type + Conditional Dropdowns ============ */}
+        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {/* निवडक वर्ग */}
+    
           <div>
             <Label text="निवडक वर्ग : " required />
             <select
@@ -422,7 +421,7 @@ const FrmInwardRegRpt = () => {
             )}
           </div>
 
-          {/* Type 2: विभाग */}
+
           {watchReportType === "2" && (
             <div>
               <Label text="विभाग : " required />
@@ -441,7 +440,7 @@ const FrmInwardRegRpt = () => {
             </div>
           )}
 
-          {/* Type 3: कर्मचारी */}
+
           {watchReportType === "3" && (
             <div>
               <Label text="कर्मचारी : " required />
@@ -460,7 +459,7 @@ const FrmInwardRegRpt = () => {
             </div>
           )}
 
-          {/* Type 4: पाठवणारा + उपप्रकार */}
+
           {watchReportType === "4" && (
             <>
               <div>
@@ -502,7 +501,7 @@ const FrmInwardRegRpt = () => {
           )}
         </div>
 
-        {/* ============ Type 4 Second Row: Doc Type + SubType ============ */}
+
         {watchReportType === "4" && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <div>
@@ -539,7 +538,7 @@ const FrmInwardRegRpt = () => {
           </div>
         )}
 
-        {/* ============ Date Fields + Checkbox ============ */}
+
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="flex items-end gap-2">
             <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -581,7 +580,7 @@ const FrmInwardRegRpt = () => {
           </div>
         </div>
 
-        {/* ============ Buttons ============ */}
+
         <div className="flex justify-center gap-3 pt-2">
           <Button type="submit" disabled={isSubmitting}>
             साठवा
@@ -591,7 +590,6 @@ const FrmInwardRegRpt = () => {
           </Button>
         </div>
 
-        {/* ============ Export Buttons + Table ============ */}
         {tableData.length > 0 && (
           <>
             <div className="flex justify-start gap-2 pt-4 border-t border-slate-200">
