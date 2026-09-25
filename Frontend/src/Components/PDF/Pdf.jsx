@@ -1,4 +1,5 @@
 import React from "react";
+
 import {
   PDFDownloadLink,
   Document,
@@ -9,186 +10,489 @@ import {
   StyleSheet,
   Image,
 } from "@react-pdf/renderer";
+
 import { Download } from "lucide-react";
 
-// Register Marathi font (must exist in /public/fonts/)
 Font.register({
   family: "NotoMarathi",
   src: "/fonts/NotoSansDevanagari-Regular.ttf",
 });
 
-// Prevent auto-hyphenation (breaks Marathi words)
-Font.registerHyphenationCallback((word) => [word]);
+
+
+const PAGE_WIDTH = 842; // A4 landscape width
+const PAGE_HEIGHT = 595; // A4 landscape height
+
+const PAGE_PADDING_LEFT = 12;
+const PAGE_PADDING_RIGHT = 12;
+
+const CONTENT_WIDTH =
+  PAGE_WIDTH -
+  PAGE_PADDING_LEFT -
+  PAGE_PADDING_RIGHT;
+
+
+
+const safe = (value, fallback = "—") => {
+  if (
+    value === undefined ||
+    value === null ||
+    value === ""
+  ) {
+    return fallback;
+  }
+
+  return String(value);
+};
+
+
+
+const wrapText = (value, width, fontSize = 6) => {
+  const text = safe(value);
+
+  if (!text || text === "—") {
+    return text;
+  }
+
+  // Account for left/right cell padding
+  const availableWidth = Math.max(
+    width - 4,
+    5
+  );
+
+  const averageCharWidth =
+    fontSize * 0.65;
+
+  const maxChars = Math.max(
+    2,
+    Math.floor(
+      availableWidth / averageCharWidth
+    )
+  );
+
+  const words = text.split(/\s+/);
+
+  const lines = [];
+  let currentLine = "";
+
+  for (const word of words) {
+
+    
+    if (word.length > maxChars) {
+
+      if (currentLine) {
+        lines.push(currentLine);
+        currentLine = "";
+      }
+
+      let remaining = word;
+
+      while (remaining.length > maxChars) {
+        lines.push(
+          remaining.substring(
+            0,
+            maxChars
+          )
+        );
+
+        remaining =
+          remaining.substring(maxChars);
+      }
+
+      currentLine = remaining;
+
+      continue;
+    }
+
+    const testLine = currentLine
+      ? `${currentLine} ${word}`
+      : word;
+
+    if (testLine.length <= maxChars) {
+      currentLine = testLine;
+    } else {
+
+      if (currentLine) {
+        lines.push(currentLine);
+      }
+
+      currentLine = word;
+    }
+  }
+
+  if (currentLine) {
+    lines.push(currentLine);
+  }
+
+  return lines.join("\n");
+};
+
 
 const styles = StyleSheet.create({
   page: {
-    padding: 20,
-    fontSize: 8,
+    paddingTop: 15,
+    paddingBottom: 30,
+    paddingLeft: PAGE_PADDING_LEFT,
+    paddingRight: PAGE_PADDING_RIGHT,
+
+    fontSize: 6,
     fontFamily: "NotoMarathi",
   },
+
+
   header: {
     flexDirection: "row",
-    justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 12,
-    paddingBottom: 8,
+
+    marginBottom: 6,
+    paddingBottom: 5,
+
     borderBottomWidth: 1,
     borderBottomColor: "#000",
   },
+
   logo: {
-    width: 50,
-    height: 50,
+    width: 40,
+    height: 40,
     objectFit: "contain",
   },
+
   logoPlaceholder: {
-    width: 50,
-    height: 50,
+    width: 40,
+    height: 40,
   },
+
   titleSection: {
     flex: 1,
-    marginHorizontal: 10,
+
+    marginLeft: 8,
+    marginRight: 8,
+
     textAlign: "center",
   },
+
   ulbName: {
-    fontSize: 13,
+    fontSize: 11,
     fontWeight: "bold",
-    marginBottom: 3,
+    marginBottom: 2,
   },
+
   reportTitle: {
-    fontSize: 12,
+    fontSize: 9,
     color: "#1e40af",
-    marginTop: 3,
   },
+
   metaRow: {
     flexDirection: "row",
     justifyContent: "space-between",
-    marginBottom: 8,
-    fontSize: 7,
+
+    marginBottom: 5,
+
+    fontSize: 6,
     color: "#555",
   },
+
+
   table: {
-    display: "flex",
     width: "100%",
-    borderStyle: "solid",
+
     borderWidth: 0.5,
-    borderRightWidth: 0,
-    borderBottomWidth: 0,
     borderColor: "#6b7280",
   },
+
+  tableHeaderRow: {
+    flexDirection: "row",
+
+    backgroundColor: "#e5e7eb",
+  },
+
   tableRow: {
     flexDirection: "row",
+    width: "100%",
   },
+
   tableCellHeader: {
-    backgroundColor: "#e5e7eb",
-    padding: 3,
-    borderStyle: "solid",
-    borderWidth: 0.5,
-    borderLeftWidth: 0,
-    borderTopWidth: 0,
+    paddingTop: 2,
+    paddingBottom: 2,
+    paddingLeft: 1,
+    paddingRight: 1,
+
+    borderRightWidth: 0.5,
+    borderBottomWidth: 0.5,
     borderColor: "#6b7280",
+
+    fontSize: 6,
     fontWeight: "bold",
+
     textAlign: "center",
-    fontSize: 7,
-    flex: 1,
+    lineHeight: 1.1,
+
+    flexGrow: 0,
+    flexShrink: 0,
   },
+
   tableCell: {
-    padding: 3,
-    borderStyle: "solid",
-    borderWidth: 0.5,
-    borderLeftWidth: 0,
-    borderTopWidth: 0,
+    paddingTop: 2,
+    paddingBottom: 2,
+    paddingLeft: 1,
+    paddingRight: 1,
+
+    borderRightWidth: 0.5,
+    borderBottomWidth: 0.5,
     borderColor: "#9ca3af",
+
     fontSize: 7,
     textAlign: "center",
-    flex: 1,
+    lineHeight: 1.15,
+
+    flexGrow: 0,
+    flexShrink: 0,
   },
+
+  noData: {
+    width: "100%",
+    padding: 10,
+    textAlign: "center",
+  },
+
+
   footer: {
     position: "absolute",
-    bottom: 12,
-    left: 20,
-    right: 20,
-    fontSize: 7,
+
+    bottom: 10,
+    left: PAGE_PADDING_LEFT,
+    right: PAGE_PADDING_RIGHT,
+
+    fontSize: 6,
     color: "#666",
+
     textAlign: "center",
+
     borderTopWidth: 0.5,
     borderTopColor: "#ccc",
-    paddingTop: 4,
+
+    paddingTop: 3,
   },
 });
 
-const safe = (v, fallback = "—") =>
-  v === undefined || v === null || v === "" ? fallback : String(v);
 
 const TablePDF = ({
   tableHeader = [],
   tableData = [],
+
   logoUrl,
   ulbName,
   reportTitle,
+
   dateRange,
   userName,
+
+  /*
+   * Example:
+   *
+   * [
+   *   "5%",
+   *   "5%",
+   *   "5%",
+   *   "6%",
+   *   ...
+   * ]
+   */
+  columnWidths = [],
 }) => {
-  const today = new Date().toLocaleDateString("en-GB");
+  const today =
+    new Date().toLocaleDateString("en-GB");
+
+  // ------------------------------------------------
+  // COLUMN WIDTH
+  // ------------------------------------------------
+
+  const getColumnWidth = (index) => {
+    if (
+      columnWidths &&
+      columnWidths[index]
+    ) {
+      return columnWidths[index];
+    }
+
+    return `${100 / tableHeader.length}%`;
+  };
+
+
+  const getColumnWidthInPoints = (index) => {
+    const width = getColumnWidth(index);
+
+    if (
+      typeof width === "string" &&
+      width.endsWith("%")
+    ) {
+      const percentage =
+        parseFloat(width);
+
+      return (
+        CONTENT_WIDTH *
+        (percentage / 100)
+      );
+    }
+
+
+    if (typeof width === "number") {
+      return width;
+    }
+
+    return (
+      CONTENT_WIDTH /
+      tableHeader.length
+    );
+  };
 
   return (
     <Document>
-      <Page size="A4" orientation="landscape" style={styles.page}>
-        {/* ---------- Header ---------- */}
+
+      <Page
+        size="A4"
+        orientation="landscape"
+        style={styles.page}
+      >
+
+
         <View style={styles.header}>
+
           {logoUrl ? (
-            <Image style={styles.logo} src={logoUrl} />
+            <Image
+              src={logoUrl}
+              style={styles.logo}
+            />
           ) : (
-            <View style={styles.logoPlaceholder} />
+            <View
+              style={styles.logoPlaceholder}
+            />
           )}
 
-          <View style={styles.titleSection}>
+          <View
+            style={styles.titleSection}
+          >
             <Text style={styles.ulbName}>
-              {safe(ulbName, "Municipal Corporation")}
+              {safe(
+                ulbName,
+                "Municipal Corporation"
+              )}
             </Text>
-            <Text style={styles.reportTitle}>
-              {safe(reportTitle, "Report")}
+
+            <Text
+              style={styles.reportTitle}
+            >
+              {safe(
+                reportTitle,
+                "Report"
+              )}
             </Text>
           </View>
 
-          <View style={styles.logoPlaceholder} />
+          <View
+            style={styles.logoPlaceholder}
+          />
+
         </View>
 
-        {/* ---------- Meta row ---------- */}
         {(dateRange || userName) && (
           <View style={styles.metaRow}>
-            <Text>{dateRange ? `दिनांक: ${dateRange}` : ""}</Text>
-            <Text>{userName ? `वापरकर्ता: ${userName}` : ""}</Text>
+
+            <Text>
+              {dateRange
+                ? `दिनांक: ${dateRange}`
+                : ""}
+            </Text>
+
+            <Text>
+              {userName
+                ? `वापरकर्ता: ${userName}`
+                : ""}
+            </Text>
+
           </View>
         )}
 
-        {/* ---------- Table ---------- */}
+
         <View style={styles.table}>
-          {/* Header row */}
-          <View style={styles.tableRow}>
-            {tableHeader.map((head, index) => (
-              <Text key={index} style={styles.tableCellHeader}>
-                {safe(head)}
-              </Text>
-            ))}
+
+          {/* TABLE HEADER */}
+          <View
+            style={styles.tableHeaderRow}
+            fixed
+          >
+            {tableHeader.map((header, index) => {
+              const width = getColumnWidth(index);
+
+              return (
+                <Text
+                  key={index}
+                  style={[
+                    styles.tableCellHeader,
+                    {
+                      width,
+                      flexGrow: 0,
+                      flexShrink: 0,
+                    },
+                  ]}
+                >
+                  {wrapText(
+                    header,
+                    getColumnWidthInPoints(index),
+                    6
+                  )}
+                </Text>
+              );
+            })}
           </View>
 
-          {/* Data rows */}
+          {/* TABLE BODY */}
           {tableData && tableData.length > 0 ? (
             tableData.map((row, rowIndex) => (
-              <View style={styles.tableRow} key={rowIndex} wrap={false}>
-                {row.map((cell, cellIndex) => (
-                  <Text key={cellIndex} style={styles.tableCell}>
-                    {safe(cell)}
-                  </Text>
-                ))}
+              <View
+                key={rowIndex}
+                style={styles.tableRow}
+                wrap={false}
+              >
+                {tableHeader.map((_, cellIndex) => {
+                  const cell = row[cellIndex];
+
+                  const width = getColumnWidth(cellIndex);
+
+                  const widthInPoints =
+                    getColumnWidthInPoints(cellIndex);
+
+                  return (
+                    <Text
+                      key={cellIndex}
+                      style={[
+                        styles.tableCell,
+                        {
+                          width,
+                          flexGrow: 0,
+                          flexShrink: 0,
+                        },
+                      ]}
+                    >
+                      {wrapText(
+                        cell,
+                        widthInPoints,
+                        6
+                      )}
+                    </Text>
+                  );
+                })}
               </View>
             ))
           ) : (
-            <View style={styles.tableRow}>
+            <View
+              style={styles.tableRow}
+              wrap={false}
+            >
               <Text
                 style={[
                   styles.tableCell,
-                  { flex: tableHeader.length, padding: 10 },
+                  styles.noData,
                 ]}
               >
                 No data available
@@ -197,38 +501,65 @@ const TablePDF = ({
           )}
         </View>
 
-        {/* ---------- Footer ---------- */}
+
         <Text
           style={styles.footer}
-          render={({ pageNumber, totalPages }) =>
-            `Generated on ${today}  |  Page ${pageNumber} of ${totalPages}`
-          }
           fixed
+          render={({
+            pageNumber,
+            totalPages,
+          }) =>
+            `Generated on ${today} | Page ${pageNumber} of ${totalPages}`
+          }
         />
+
       </Page>
+
     </Document>
   );
 };
 
+
 const Pdf = ({
   tableHeader = [],
   tableData = [],
+
   fileName = "report.pdf",
+
   ulbName,
   logoUrl,
   reportTitle,
+
   dateRange,
   userName,
+
+  columnWidths = [],
 }) => {
-  // Guard: don't render the link at all if no data
-  if (!tableData || tableData.length === 0) {
+
+  if (
+    !tableData ||
+    tableData.length === 0
+  ) {
     return (
       <button
         disabled
         type="button"
-        className="bg-blue-600 flex items-center gap-2 text-white font-medium px-4 py-2 rounded-md opacity-60 cursor-not-allowed"
+        className="
+          bg-blue-600
+          flex
+          items-center
+          gap-2
+          text-white
+          font-medium
+          px-4
+          py-2
+          rounded-md
+          opacity-60
+          cursor-not-allowed
+        "
       >
         <Download className="w-4 h-4" />
+
         Export to PDF
       </button>
     );
@@ -240,28 +571,61 @@ const Pdf = ({
         <TablePDF
           tableHeader={tableHeader}
           tableData={tableData}
+
           ulbName={ulbName}
           logoUrl={logoUrl}
           reportTitle={reportTitle}
+
           dateRange={dateRange}
           userName={userName}
+
+          columnWidths={
+            columnWidths
+          }
         />
       }
       fileName={fileName}
-      style={{ textDecoration: "none" }}
+      style={{
+        textDecoration: "none",
+      }}
     >
-      {({ loading, error }) => {
+      {({
+        loading,
+        error,
+      }) => {
+
         if (error) {
-          console.error("PDF generation error:", error);
+          console.error(
+            "PDF generation error:",
+            error
+          );
         }
+
         return (
           <button
             disabled={loading}
             type="button"
-            className="bg-blue-600 flex items-center gap-2 hover:bg-blue-700 text-white font-medium px-4 py-2 rounded-md hover:cursor-pointer disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+            className="
+              bg-blue-600
+              flex
+              items-center
+              gap-2
+              hover:bg-blue-700
+              text-white
+              font-medium
+              px-4
+              py-2
+              rounded-md
+              disabled:opacity-60
+              disabled:cursor-not-allowed
+              transition-colors
+            "
           >
             <Download className="w-4 h-4" />
-            {loading ? "Preparing..." : "Export to PDF"}
+
+            {loading
+              ? "Preparing..."
+              : "Export to PDF"}
           </button>
         );
       }}

@@ -88,6 +88,9 @@ const FrmInwardRegRpt = () => {
   const [docTypeOptions, setDocTypeOptions] = useState([]);
   const [docSubTypeOptions, setDocSubTypeOptions] = useState([]);
 
+  const [ulbLogo, setUlbLogo] = useState("");
+  const [municipalText, setMunicipalText ] = useState("");
+
   // ================= REPORT DATA =================
   const [tableData, setTableData] = useState([]);
 
@@ -223,6 +226,25 @@ const FrmInwardRegRpt = () => {
     fetchSubTypes();
   }, [watchSender, ulbid]);
 
+  const fetchLogoAndMunicipal = async () => {
+    try {
+      setLoading(true);
+
+      const response = await apiService.post("textlogo", {
+        "ulbId": Number(ulbid)
+      });
+
+      if (response.data.success) {
+        setUlbLogo(response?.data?.data?.ULBLOGO);
+        setMunicipalText(response?.data?.data?.ABC_MUNICIPAL_TEXT)
+      } 
+    } catch (error) {
+      console.error(error);
+    } finally { 
+      setLoading(false);
+    }
+  }
+
   // ================= SUBMIT =================
   const onSubmit = async (data) => {
     if (!ulbid) {
@@ -357,6 +379,12 @@ const FrmInwardRegRpt = () => {
     watchReportType === "1" && watchFromDate && watchToDate
       ? `${formatDisplayDate(watchFromDate)} ते ${formatDisplayDate(watchToDate)}`
       : "";
+
+  useEffect(() => {
+    if (ulbid) {
+      fetchLogoAndMunicipal();
+    }
+  }, [ulbid]);
 
   return (
     <Layout
@@ -583,8 +611,8 @@ const FrmInwardRegRpt = () => {
                 fileName={`InwardRegister_${new Date()
                   .toISOString()
                   .slice(0, 10)}.pdf`}
-                ulbName={user?.ulbName || "Municipal Corporation"}
-                logoUrl={user?.ulbLogo || ""}
+                ulbName={municipalText|| "Municipal Corporation"}
+                logoUrl={ulbLogo || ""}
                 reportTitle="आवक रजिस्टर"
                 dateRange={dateRangeText}
                 userName={user?.username || ""}
