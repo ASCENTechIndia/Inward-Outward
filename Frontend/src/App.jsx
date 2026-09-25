@@ -35,6 +35,7 @@ import FrmInwardDocUpload from "./Pages/Inward/FrmInwardDocUpload.jsx";
 import FrmInvardDtlsCommunication from "./Pages/Inward/FrmInvardDtlsCommunication.jsx";
 import FrmInwardTransfer from "./Pages/Inward/FrmInwardTransfer.jsx";
 import FrmInwardRegRpt from "./Pages/Reports/FrmInwardRegRpt.jsx";
+import FrmTransferDtlsRpt from "./Pages/Reports/FrmTransferDtlsRpt.jsx";
 
 function App() {
   const hostname = window.location.hostname;
@@ -93,7 +94,10 @@ function App() {
 
                   {/* Reports */}
                   <Route path="/Reports/FrmInwardRegRpt" element={<FrmInwardRegRpt />} />
-
+                  <Route 
+                    path="/Reports/FrmTransferDtlsRpt"
+                    element={<FrmTransferDtlsRpt />}
+                  />
 
                 </Routes>
               </ProtectedRoute>

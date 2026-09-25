@@ -152,6 +152,11 @@ const STATIC_MENU = [
         MENUTITLE: "आवक रजिस्टर",
         PAGEPATH: "/Reports/FrmInwardRegRpt",
       },
+      {
+        MENUID: 502,
+        MENUTITLE: "हस्तांतरण अहवाल",
+        PAGEPATH: "/Reports/FrmTransferDtlsRpt"
+      }
     ],
   },
 ];
