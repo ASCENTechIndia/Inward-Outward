@@ -304,10 +304,9 @@ const FrmInwardRegRpt = () => {
         docSubTypeId: data.docSubTypeId ? Number(data.docSubTypeId) : null,
       };
 
-      // console.log("Report payload:", payload);
 
       const res = await apiService.post("getInwardRegisterReport", payload);
-      // console.log("Report response:", res);
+
 
       if (res?.data?.success && Array.isArray(res.data.data)) {
         if (res.data.data.length === 0) {
