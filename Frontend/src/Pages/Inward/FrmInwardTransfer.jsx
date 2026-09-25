@@ -285,7 +285,7 @@ const FrmInwardTransfer = () => {
 
             const response = await apiService.post("getEmployeeNameDropdown", { ulbid: Number(ulbid), desigId: Number(watchTableDesignation), departmentId: Number(watchTableDepartment) });
             // console.log(watchTableDepartment, watchTableDesignation, selectedTableDesg)
-            console.log(response);
+            // console.log(response);
             if (response.data.success) {
                 const formatted = response.data.data.map(item => ({
                     label: item.VAR_USER_USERNAME,
@@ -315,7 +315,7 @@ const FrmInwardTransfer = () => {
             if (response.data.success) {
                 const data = response.data.data;
 
-                console.log("Application Details:", data);
+                // console.log("Application Details:", data);
 
                 setApplicantInwardId(data.INWARDID);
                 setApplicationTransId(data.TRANSID);
@@ -377,7 +377,7 @@ const FrmInwardTransfer = () => {
 
             const response = await apiService.post("getForwardTransferData", payload);
 
-            console.log(response);
+            // console.log(response);
 
             if (response.data.success) {
                 if (!response.data.data.length) {
@@ -460,7 +460,7 @@ const FrmInwardTransfer = () => {
                 alert("Error in submitting form.");
             }
         } catch (error) {
-            console.log(error);
+            console.error(error);
         } finally {
             setLoading(false);
         }
