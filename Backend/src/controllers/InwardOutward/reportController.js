@@ -132,4 +132,249 @@ const getInwardRegisterReport = async (req, res) => {
   }
 };
 
-module.exports = { getEmpDropdown, getInwardRegisterReport };
+const getFileMovementTrackingList = async (req, res) => {
+  let connection;
+  try {
+    const { ulbid, inwardNo } = req.body;
+
+    if (!ulbid) {
+      return res.json({ success: false, errorMessage: "UlbId is required" });
+    }
+
+    connection = await getConnection();
+
+    let query = ``;
+    let bind = {};
+    if (inwardNo) {
+      query = `SELECT * FROM VIEW_INWARD_REG r
+            WHERE  1 = 1
+            AND  inword_no = :inwardNo
+            AND  ulbid = :ulbid`;
+      bind = {
+        ulbid: Number(ulbid),
+        inwardNo: String(inwardNo).trim(),
+      };
+    } else {
+      query = `
+        SELECT * FROM view_tacker
+        WHERE 1=1
+        AND inwardno LIKE '%' || :inwardNo
+        AND ulbid = :ulbid
+        `;
+      bind = {
+        ulbid: Number(ulbid),
+        inwardNo: "",
+      };
+    }
+
+    const result = await connection.execute(query, bind, {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+    });
+
+    res.json({
+      success: true,
+      data: result.rows || [],
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error("Error closing DB connection:", err);
+      }
+    }
+  }
+};
+
+const getFileMovementTrackingPopupList = async (req, res) => {
+  let connection;
+  try {
+    const { ulbid, fromdate, toDate } = req.body;
+
+    if (!ulbid) {
+      return res.json({ success: false, errorMessage: "UlbId is required" });
+    }
+    if (!fromdate) {
+      return res.json({
+        success: false,
+        errorMessage: "From Date is required",
+      });
+    }
+    if (!toDate) {
+      return res.json({ success: false, errorMessage: "To Date is required" });
+    }
+
+    connection = await getConnection();
+
+    const query = `SELECT DISTINCT r.inwardid,
+            inword_no,
+            sender_name,
+            sender_subtype_name,
+            mobile_no,
+            subject,
+            ref_no
+        FROM   VIEW_INWARD_REG r
+        WHERE  TRUNC(inwarddate) >= TO_DATE(:fromdate, 'DD-MM-YYYY')
+        AND  TRUNC(inwarddate) <= TO_DATE(:toDate,   'DD-MM-YYYY')
+        AND  ulbid = :ulbid
+        ORDER  BY r.inwardid ASC`;
+
+    const bind = {
+      ulbid: Number(ulbid),
+      fromdate: fromdate,
+      toDate: toDate,
+    };
+
+    const result = await connection.execute(query, bind, {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+    });
+
+    res.json({
+      success: true,
+      data: result.rows || [],
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error("Error closing DB connection:", err);
+      }
+    }
+  }
+};
+
+const getInwardNoClickList = async (req, res) => {
+  let connection;
+  try {
+    const { ulbid, inwardNo } = req.body;
+    if (!ulbid) {
+      return res.json({ success: false, errorMessage: "UlbId is requried" });
+    }
+    if (!inwardNo) {
+      return res.json({
+        success: false,
+        errormessage: "Inward Number is required",
+      });
+    }
+    connection = await getConnection();
+    const query1 = `SELECT * FROM view_tacker
+        WHERE  1 = 1
+        AND  inwardno LIKE '%' || :inwardNo
+        AND  ulbid = :ulbid`;
+    const bind = {
+      ulbid: Number(ulbid),
+      inwardNo: inwardNo,
+    };
+    const result1 = await connection.execute(query1, bind, {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+    });
+
+    const query2 = `SELECT num_inwardcc_inwardno   AS inwardno,
+                blockmas.wardname       AS wardname,
+                dept.engmarname         AS engmarname,
+                desig.desig_ename       AS desig_ename,
+                var_user_username       AS username
+            FROM   aoio_inwardcc_det
+            INNER  JOIN prop.vw_blockmas blockmas
+                    ON blockmas.wardid = num_inwardcc_prabhagid
+                    AND blockmas.ulbid = num_inwardcc_ulbid
+            INNER  JOIN prop.vw_deptconfig dept
+                    ON dept.deptid = num_inwardcc_deptid
+                    AND dept.ulbid = num_inwardcc_ulbid
+            INNER  JOIN prop.vw_desigconfig desig
+                    ON desig.desig_id = num_inwardcc_desgid
+                    AND desig.ulbid = num_inwardcc_ulbid
+            INNER  JOIN admins.aoma_user_def
+                    ON num_user_userid = num_inwardcc_empid
+                    AND num_user_ulbid = num_inwardcc_ulbid
+            WHERE  num_inwardcc_inwardno = :inwardNo
+            AND  num_inwardcc_ulbid = :ulbid`;
+
+    const result2 = await connection.execute(query2, bind, {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+    });
+    res.json({
+      success: true,
+      data: result1.rows || [],
+      ccData: result2.rows || [],
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error("Error closing DB connection:", err);
+      }
+    }
+  }
+};
+
+const getTransferDetailsReport = async (req, res) => {
+  let connection;
+  try {
+    const { ulbid, inwardNo } = req.body;
+
+    if (!ulbid) {
+      return res.json({ success: false, errorMessage: "UlbId is required" });
+    }
+
+    if (!inwardNo || !inwardNo.trim()) {
+      return res.json({
+        success: false,
+        errorMessage: "Inward No is required",
+      });
+    }
+
+    connection = await getConnection();
+
+    const query = `
+      SELECT * FROM VIEW_TRANSFER_DET
+      WHERE inward_no = :inwardNo
+        AND ulbid = :ulbid
+    `;
+
+    const bind = {
+      ulbid: Number(ulbid),
+      inwardNo: String(inwardNo).trim(),
+    };
+
+    const result = await connection.execute(query, bind, {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+    });
+
+    res.json({
+      success: true,
+      data: result.rows || [],
+    });
+  } catch (error) {
+    console.error("getTransferDetailsReport error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error("Error closing DB connection:", err);
+      }
+    }
+  }
+};
+
+module.exports = {
+  getEmpDropdown,
+  getInwardRegisterReport,
+  getFileMovementTrackingList,
+  getFileMovementTrackingPopupList,
+  getInwardNoClickList,
+  getTransferDetailsReport,
+};
