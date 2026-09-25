@@ -120,6 +120,11 @@ const STATIC_MENU = [
         MENUTITLE: "आवक नोंदणी",
         PAGEPATH: "/Inward/FrmInwardRegister",
       },
+      {
+        MENUID: 305,
+        MENUTITLE: "हस्तांतरण किंवा अंतर्गत संप्रेषण",
+        PAGEPATH: "/Inward/FrmInwardDtlsCommunication"
+      },
     ],
   },
   {
