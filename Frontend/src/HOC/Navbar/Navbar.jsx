@@ -143,6 +143,17 @@ const STATIC_MENU = [
       },
     ],
   },
+  {
+    MENUID: 5,
+    MENUTITLE: "Reports",
+    children: [
+      {
+        MENUID: 501,
+        MENUTITLE: "आवक रजिस्टर",
+        PAGEPATH: "/Reports/FrmInwardRegRpt",
+      },
+    ],
+  },
 ];
 
 const Navbar = ({ title = "Inward Outward", isOpen, onClose }) => {

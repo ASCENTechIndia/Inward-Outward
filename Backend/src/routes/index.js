@@ -26,4 +26,7 @@ router.use("/", outwardRoutes);
 const inwardRoutes = require("./InwardOutward/inwardRoutes.js");
 router.use("/", inwardRoutes);
 
+const reportRoutes = require("./InwardOutward/reportRoutes.js");
+router.use("/", reportRoutes);
+
 module.exports = router;
