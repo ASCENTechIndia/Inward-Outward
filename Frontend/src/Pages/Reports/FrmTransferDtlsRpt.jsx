@@ -133,13 +133,40 @@ const FrmTransferDtlsRpt = () => {
                 </div>
                 {formattedData.length > 0 &&
                     (
-                        <div className="mt-3">
-                            <Table
-                                headers={tableHeader}
-                                data={formattedData}
-                                rowsPerPage={10}
-                            />
-                        </div>
+                        <>
+
+                            <div className="flex justify-start gap-2 pt-4 border-t border-slate-200 mt-3">
+                                <Excel
+                                    tableHeader={tableHeader}
+                                    tableData={formattedData}
+                                    fileName={`Transfer_Details_${new Date()
+                                        .toISOString()
+                                        .slice(0, 10)}.xlsx`}
+                                    sheetName="Transfer Details"
+                                    title="हस्तांतरण अहवाल"
+                                />
+
+                                <Pdf
+                                    tableHeader={tableHeader}
+                                    tableData={formattedData}
+                                    fileName={`Transfer_Details_${new Date()
+                                        .toISOString()
+                                        .slice(0, 10)}.pdf`}
+                                    ulbName={municipalText || "Municipal Corporation"}
+                                    logoUrl={ulbLogo || ""}
+                                    reportTitle="हस्तांतरण अहवाल"
+                                    dateRange={dateRangeText}
+                                    userName={user?.username || ""}
+                                />
+                            </div>
+                            <div className="mt-3">
+                                <Table
+                                    headers={tableHeader}
+                                    data={formattedData}
+                                    rowsPerPage={10}
+                                />
+                            </div>
+                        </>
                     )
                 }
             </form>
