@@ -18,6 +18,19 @@ const getToday = () => {
     return `${d.getFullYear()}-${month}-${day}`;
 };
 
+const formatDate = (dateString) => {
+    if (!dateString) return "";
+
+    const date = new Date(dateString);
+
+    const day = String(date.getDate()).padStart(2, "0");
+    const month = String(date.getMonth() + 1).padStart(2, "0");
+    const year = date.getFullYear();
+
+    return `${day}/${month}/${year}`;
+};
+
+
 const formatOracleDate = (dateStr) => {
     if (!dateStr) return null;
     const d = new Date(dateStr);
@@ -88,7 +101,7 @@ const FrmOutwardRegRpt = () => {
     const fetchTableData = async (data) => {
         try {
             setLoading(true);
-            // console.log(data);
+   
             const payload = {
                 ulbid: Number(ulbid),
                 fromDate: formatOracleDate(data.fromDate),
@@ -96,25 +109,24 @@ const FrmOutwardRegRpt = () => {
                 userId
             };
 
-
             const response = await apiService.post("getOutwardRegReport", payload);
 
-            console.log(response);
-            return;
             if (response.data.success && response.data.data.length > 0) {
-                setTableData(response.data.data[0]);
+                setTableData(response.data.data);
 
                 const formatted = response.data.data.map((item, index) => ([
                     index + 1,
-                    item.INWARD_NO || "-",
-                    item.FROMUSER || "-",
-                    item.TOUSER || "-",
-                    item.FROM_PRABHAGNAME || "-",
-                    item.FROM_DEPTNAME || "-",
-                    item.TO_DEPTNAME || "-",
-                    item.PURPOSE_NAME || "-",
-                    item.DESG_NAME || "-",
-                    item.ACTION || "-"
+                    item.OUTWARDNO || "-",
+                    formatDate(item.OUTDATE) || "-",
+                    item.RECEIVERCATEGORY_NAME || "-",
+                    item.DOCTYPE_NAME || "-",
+                    item.INWREFNO || "-",
+                    formatDate(item.REFDATE) || "-",
+                    item.RECEIVERNAME || "-",
+                    item.ADDRESS || "-",
+                    item.SUBJECT || "-",
+                    item.OUTWARDMODE_NAME || "-",
+                    item.REMARK || "-"
                 ]));
                 setFormattedData(formatted);
             } else if (response.data.success && response.data.data.length === 0) {
