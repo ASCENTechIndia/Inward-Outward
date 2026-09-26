@@ -154,11 +154,16 @@ const STATIC_MENU = [
       },
       {
         MENUID: 502,
+        MENUTITLE: "File Movement Tracking",
+        PAGEPATH: "/Reports/RptFileMoveTrack"
+      },
+      {
+        MENUID: 503,
         MENUTITLE: "हस्तांतरण अहवाल",
         PAGEPATH: "/Reports/FrmTransferDtlsRpt"
       },
       {
-        MENUID: 503,
+        MENUID: 504,
         MENUTITLE: "जावक नोंदणी अहवाल",
         PAGEPATH: "/Reports/FrmOutwardRegRpt"
       }

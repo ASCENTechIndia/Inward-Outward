@@ -37,6 +37,7 @@ import FrmInwardTransfer from "./Pages/Inward/FrmInwardTransfer.jsx";
 import FrmInwardRegRpt from "./Pages/Reports/FrmInwardRegRpt.jsx";
 import FrmTransferDtlsRpt from "./Pages/Reports/FrmTransferDtlsRpt.jsx";
 import FrmOutwardRegRpt from "./Pages/Reports/FrmOutwardRegRpt.jsx";
+import RptFileMoveTrack from "./Pages/Reports/RptFileMoveTrack.jsx";
 
 function App() {
   const hostname = window.location.hostname;
@@ -102,6 +103,10 @@ function App() {
                   <Route 
                     path="/Reports/FrmOutwardRegRpt"
                     element={<FrmOutwardRegRpt />}
+                  />
+                  <Route 
+                    path="/Reports/RptFileMoveTrack"
+                    element={<RptFileMoveTrack />}
                   />
 
                 </Routes>
