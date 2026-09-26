@@ -370,6 +370,62 @@ const getTransferDetailsReport = async (req, res) => {
   }
 };
 
+const getOutwardRegReport = async (req, res) => {
+  let connection;
+  try {
+    const { ulbid, fromDate, toDate, userId } = req.body;
+
+    if (!ulbid) {
+      return res.json({ success: false, errorMessage: "UlbId is required" });
+    }
+    if (!fromDate) {
+      return res.json({
+        success: false,
+        errorMessage: "From Date is required",
+      });
+    }
+    if (!toDate) {
+      return res.json({ success: false, errorMessage: "To Date is required" });
+    }
+    if(!userId){
+        return res.json({success: false, errorMessage: "User Id is required"})
+    }
+
+    connection = await getConnection();
+
+    const query = `select * from view_outward_reg
+        where trunc(outdate) >= TO_DATE(:fromDate,'dd-MM-yyyy') 
+        and trunc(outdate) <= TO_DATE(:toDate,'dd-MM-yyyy') and insby=:userId and ulbid=:ulbid`;
+
+    const bind = {
+      ulbid: Number(ulbid),
+      fromDate,
+      toDate,
+      userId
+    };
+
+    const result = await connection.execute(query, bind, {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+    });
+
+    res.json({
+      success: true,
+      data: result.rows || [],
+    });
+  } catch (error) {
+    console.error("getTransferDetailsReport error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error("Error closing DB connection:", err);
+      }
+    }
+  }
+};
+
 module.exports = {
   getEmpDropdown,
   getInwardRegisterReport,
@@ -377,4 +433,5 @@ module.exports = {
   getFileMovementTrackingPopupList,
   getInwardNoClickList,
   getTransferDetailsReport,
+  getOutwardRegReport,
 };

@@ -6,6 +6,7 @@ const {
   getFileMovementTrackingPopupList,
   getInwardNoClickList,
   getTransferDetailsReport,
+  getOutwardRegReport,
 } = require("../../controllers/InwardOutward/reportController");
 
 const router = express.Router();
@@ -20,5 +21,6 @@ router.post(
 );
 router.post("/getInwardNoClickList", getInwardNoClickList);
 router.post("/getTransferDetailsReport", getTransferDetailsReport);
+router.post("/getOutwardRegReport", getOutwardRegReport);
 
 module.exports = router;
