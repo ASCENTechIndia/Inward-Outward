@@ -47,6 +47,7 @@ const FrmInwardTransfer = () => {
     // const [selectedAction, setSelectedAction] = useState("");
     const [selectedTableDept, setSelectedTableDept] = useState("");
     const [selectedTableDesg, setSelectedTableDesg] = useState("");
+    const [forwardApplicationData, setForwardApplicationData] = useState({});
 
     const [senderOptions, setSenderOptions] = useState([]);
     const [subTypeOptions, setSubTypeOptions] = useState([]);
@@ -377,21 +378,24 @@ const FrmInwardTransfer = () => {
 
             const response = await apiService.post("getForwardTransferData", payload);
 
-            // console.log(response);
+            console.log(response);
 
             if (response.data.success) {
                 if (!response.data.data.length) {
-                    setValue("action", "F");
+                    // setValue("action", "F");
+                    setForwardApplicationData({});
                     return;
                 }
 
                 const data = response.data.data[0];
 
-                setValue("tableRow.prabhag", data.NUM_TRANSFER_FRMPRABHAGID);
-                setValue("tableRow.department", data.NUM_TRANSFER_FRMDEPTID);
-                setValue("tableRow.purpose", data.NUM_TRANSFER_PURPOSEID);
-                setValue("tableRow.designation", data.NUM_USER_DESGID);
-                setValue("tableRow.employeeName", data.VAR_TRANSFER_INSBY);
+                // setValue("tableRow.prabhag", data.NUM_TRANSFER_FRMPRABHAGID);
+                // setValue("tableRow.department", data.NUM_TRANSFER_FRMDEPTID);
+                // setValue("tableRow.purpose", data.NUM_TRANSFER_PURPOSEID);
+                // setValue("tableRow.designation", data.NUM_USER_DESGID);
+                // setValue("tableRow.employeeName", data.VAR_TRANSFER_INSBY);
+                setForwardApplicationData(data);
+
             }
         } catch (error) {
             console.error(error);
@@ -419,14 +423,21 @@ const FrmInwardTransfer = () => {
         const action = formData?.action || "";
         const remarkField = formData?.remark || "";
 
-        return `${collid}$${deptid}$${prabhag || ""}$${department || ""}$${purpose || ""
-            }$${employeeName || ""}$${designation || ""}$${remark || remarkField || ""}$${action}$${transid || ""}`;
+        return `${collid}$${deptid}$${prabhag || forwardApplicationData.NUM_TRANSFER_FRMPRABHAGID || ""}$${department || forwardApplicationData.NUM_TRANSFER_FRMDEPTID || ""}$${purpose || forwardApplicationData.NUM_TRANSFER_PURPOSEID || ""}$${employeeName || forwardApplicationData.VAR_TRANSFER_INSBY || ""}$${designation || forwardApplicationData.NUM_USER_DESGID || ""}$${remark || remarkField || ""}$${action}$${transid || ""}`;
     };
 
 
     const handleTransferSubmit = async (data) => {
         try {
             setLoading(true);
+
+            console.log("Entries: ", Object.entries(forwardApplicationData));
+            if (watchAction === "R" && Object.entries(forwardApplicationData).length === 0) {
+                alert("Please fill the details");
+                setValue("remark", "");
+                setValue("action", "F");
+                return;
+            }
 
             // console.log(data);
             const ipAddress = await GetIPAddress();
