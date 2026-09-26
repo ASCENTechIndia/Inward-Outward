@@ -32,8 +32,8 @@ const FrmReceiverCtgryList = () => {
         const data = res.data.data.map((item, index) => [
           <Link
             key={`${item.NUM_RECEIVERCATEGORY_ID}-${index}`}
-            state={{ receiverCategoryId: item.NUM_RECEIVERCATEGORY_ID }}
-            to={`/Masters/FrmReceiverCtgryMaster`}
+            state={{ receiverCategoryId: item.NUM_RECEIVERCATEGORY_ID, mode: 2, receiverCategory: item.VAR_RECEIVERCATEGORY_NAME }}
+            to={`/Masters/ReceiverCtgryMaster`}
             className="text-blue-600 underline hover:text-blue-800 font-medium"
           >
             Select
