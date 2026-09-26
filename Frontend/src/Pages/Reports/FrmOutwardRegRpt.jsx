@@ -116,17 +116,17 @@ const FrmOutwardRegRpt = () => {
 
                 const formatted = response.data.data.map((item, index) => ([
                     index + 1,
-                    item.OUTWARDNO || "-",
-                    formatDate(item.OUTDATE) || "-",
-                    item.RECEIVERCATEGORY_NAME || "-",
-                    item.DOCTYPE_NAME || "-",
-                    item.INWREFNO || "-",
-                    formatDate(item.REFDATE) || "-",
-                    item.RECEIVERNAME || "-",
-                    item.ADDRESS || "-",
-                    item.SUBJECT || "-",
-                    item.OUTWARDMODE_NAME || "-",
-                    item.REMARK || "-"
+                    item.OUTWARDNO || "",
+                    formatDate(item.OUTDATE) || "",
+                    item.RECEIVERCATEGORY_NAME || "",
+                    item.DOCTYPE_NAME || "",
+                    item.INWREFNO || "",
+                    formatDate(item.REFDATE) || "",
+                    item.RECEIVERNAME || "",
+                    item.ADDRESS || "",
+                    item.SUBJECT || "",
+                    item.OUTWARDMODE_NAME || "",
+                    item.REMARK || ""
                 ]));
                 setFormattedData(formatted);
             } else if (response.data.success && response.data.data.length === 0) {
