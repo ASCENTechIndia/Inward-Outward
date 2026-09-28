@@ -105,7 +105,7 @@ const FrmInwardDocUpload = () => {
                 payload
             );
 
-            console.log("Documents API Response:", response);
+            // console.log("Documents API Response:", response);
 
             if (response.data.success) {
                 const formattedList = response.data.data.map((item) => ({
@@ -221,7 +221,7 @@ const FrmInwardDocUpload = () => {
                 fileInput.value = "";
             }
 
-            console.log("Document added:", newDocument);
+            // console.log("Document added:", newDocument);
 
         } catch (error) {
             console.error("File conversion error:", error);
@@ -261,10 +261,7 @@ const FrmInwardDocUpload = () => {
 
         let base64 = String(value).trim();
 
-        // -----------------------------------------
-        // 1. Standard Data URL
-        // data:application/pdf;base64,JVBERi0...
-        // -----------------------------------------
+
         if (base64.startsWith("data:")) {
             const commaIndex = base64.indexOf(",");
 
@@ -275,11 +272,7 @@ const FrmInwardDocUpload = () => {
             base64 = base64.substring(commaIndex + 1);
         }
 
-        // -----------------------------------------
-        // 2. Your API format
-        // dataapplication/pdfbase64JVBERi0...
-        // dataimage/pngbase64iVBORw0...
-        // -----------------------------------------
+
         else if (base64.startsWith("data")) {
             const match = base64.match(
                 /^data([a-zA-Z0-9.+-]+\/[a-zA-Z0-9.+-]+)base64/
@@ -290,18 +283,15 @@ const FrmInwardDocUpload = () => {
             }
         }
 
-        // Remove whitespace/newlines
+     
         base64 = base64.replace(/\s/g, "");
 
-        // Remove accidental quotes
         base64 = base64.replace(/^["']|["']$/g, "");
 
-        // Convert Base64URL → Base64
         base64 = base64
             .replace(/-/g, "+")
             .replace(/_/g, "/");
 
-        // Validate characters
         if (!/^[A-Za-z0-9+/]*={0,2}$/.test(base64)) {
             console.error(
                 "Invalid Base64:",
@@ -311,10 +301,9 @@ const FrmInwardDocUpload = () => {
             throw new Error("Invalid Base64 characters");
         }
 
-        // Remove existing padding
+
         base64 = base64.replace(/=+$/, "");
 
-        // Validate length
         const remainder = base64.length % 4;
 
         if (remainder === 1) {
@@ -323,7 +312,6 @@ const FrmInwardDocUpload = () => {
             );
         }
 
-        // Add padding
         if (remainder > 0) {
             base64 += "=".repeat(4 - remainder);
         }
@@ -347,9 +335,6 @@ const FrmInwardDocUpload = () => {
                 return;
             }
 
-            // -----------------------------------------
-            // 2. Existing API document
-            // -----------------------------------------
             if (!doc.base64) {
                 alert("Document उपलब्ध नाही.");
                 return;
@@ -364,9 +349,6 @@ const FrmInwardDocUpload = () => {
 
             let mimeType = "application/octet-stream";
 
-            // -----------------------------------------
-            // 3. Detect MIME type
-            // -----------------------------------------
 
             if (rawBase64.startsWith("data:")) {
                 const mimeMatch = rawBase64.match(
@@ -387,20 +369,12 @@ const FrmInwardDocUpload = () => {
             }
 
 
-            // -----------------------------------------
-            // 4. Normalize Base64
-            // -----------------------------------------
-
             const base64 = normalizeBase64(rawBase64);
 
             if (!base64) {
                 alert("Document Base64 data उपलब्ध नाही.");
                 return;
             }
-
-            // -----------------------------------------
-            // 5. Validate Base64 length
-            // -----------------------------------------
 
             if (base64.length % 4 !== 0) {
                 alert(
@@ -409,10 +383,6 @@ const FrmInwardDocUpload = () => {
                 return;
             }
 
-            // -----------------------------------------
-            // 6. Validate Base64 characters
-            // -----------------------------------------
-
             if (!/^[A-Za-z0-9+/]*={0,2}$/.test(base64)) {
                 alert(
                     "Document Base64 format invalid किंवा incomplete आहे."
@@ -420,9 +390,6 @@ const FrmInwardDocUpload = () => {
                 return;
             }
 
-            // -----------------------------------------
-            // 7. Decode Base64
-            // -----------------------------------------
 
             let byteCharacters;
 
@@ -438,18 +405,12 @@ const FrmInwardDocUpload = () => {
                 return;
             }
 
-            // -----------------------------------------
-            // 8. Convert to bytes
-            // -----------------------------------------
 
             const byteArray = Uint8Array.from(
                 byteCharacters,
                 (char) => char.charCodeAt(0)
             );
 
-            // -----------------------------------------
-            // 9. Detect file type from signature
-            // -----------------------------------------
 
             if (base64.startsWith("JVBERi0")) {
                 mimeType = "application/pdf";
@@ -461,16 +422,12 @@ const FrmInwardDocUpload = () => {
                 mimeType = "image/gif";
             }
 
-            // -----------------------------------------
-            // 10. Validate PDF completeness
-            // -----------------------------------------
 
             if (mimeType === "application/pdf") {
                 const pdfText = new TextDecoder("latin1").decode(
                     byteArray
                 );
 
-                // PDF must start with %PDF
                 if (!pdfText.startsWith("%PDF")) {
                     alert(
                         "PDF document invalid किंवा incomplete आहे."
@@ -478,7 +435,7 @@ const FrmInwardDocUpload = () => {
                     return;
                 }
 
-                // PDF normally ends with %%EOF
+
                 if (!pdfText.includes("%%EOF")) {
                     alert(
                         "PDF document incomplete आहे. कृपया document पुन्हा upload करा."
@@ -487,21 +444,11 @@ const FrmInwardDocUpload = () => {
                 }
             }
 
-            console.log("MIME:", mimeType);
-            console.log("Base64 length:", base64.length);
-            console.log("Decoded bytes:", byteArray.length);
-
-            // -----------------------------------------
-            // 11. Create Blob
-            // -----------------------------------------
 
             const blob = new Blob([byteArray], {
                 type: mimeType,
             });
 
-            // -----------------------------------------
-            // 12. Open document
-            // -----------------------------------------
 
             const fileUrl = URL.createObjectURL(blob);
 
