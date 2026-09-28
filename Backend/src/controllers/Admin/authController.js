@@ -75,7 +75,7 @@ const login = async (req, res) => {
       IN_IPADDR: "192.168.1.100",
       IN_HOSTNAME: "localhost",
       IN_SOURCE: "WEB",
-      IN_DEPTID: "1261",
+      IN_DEPTID: "38",
 
       OUT_USERNAME: {
         dir: oracledb.BIND_OUT,
