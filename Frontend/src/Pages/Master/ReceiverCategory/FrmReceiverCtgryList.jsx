@@ -26,13 +26,11 @@ const FrmReceiverCtgryList = () => {
       setLoading(true);
       const res = await apiService.get("getReceiverCategoryList");
 
-      console.log("Receiver Category List:", res);
-
       if (res?.data?.success && Array.isArray(res.data.data)) {
         const data = res.data.data.map((item, index) => [
           <Link
             key={`${item.NUM_RECEIVERCATEGORY_ID}-${index}`}
-            state={{ receiverCategoryId: item.NUM_RECEIVERCATEGORY_ID, mode: 2, receiverCategory: item.VAR_RECEIVERCATEGORY_NAME }}
+            state={{ receiverCategoryId: item.NUM_RECEIVERCATEGORY_ID }}
             to={`/Masters/ReceiverCtgryMaster`}
             className="text-blue-600 underline hover:text-blue-800 font-medium"
           >
