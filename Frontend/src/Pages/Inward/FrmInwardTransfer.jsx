@@ -784,8 +784,7 @@ const FrmInwardTransfer = () => {
                                                 </td>
                                                 <td className="px-3 py-2">
                                                     <select
-                                                        className="form-input-box w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm
-                                        bg-slate-100 text-slate-500"
+                                                        className="form-input-box w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm"
                                                         {...register(`tableRow.purpose`)}
                                                     >
                                                         <option value="">-- Select --</option>
