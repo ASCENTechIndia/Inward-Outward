@@ -333,9 +333,7 @@ const FrmInwardDocUpload = () => {
 
     const handleDocumentView = (doc) => {
         try {
-            // -----------------------------------------
-            // 1. Newly uploaded File
-            // -----------------------------------------
+
           
             if (doc.file instanceof File) {
                 const fileUrl = URL.createObjectURL(doc.file);
