@@ -68,7 +68,7 @@ const FrmInwardDocUpload = () => {
 
             const response = await apiService.post("getInwarDocUploadList", payload);
 
-            if (response.data.success && response.data.data.length > 0) {
+            if (response?.data?.success && response?.data?.data.length > 0) {
                 const data = response.data.data[0];
 
                 setApplicantTableData([
@@ -107,7 +107,7 @@ const FrmInwardDocUpload = () => {
 
             // console.log("Documents API Response:", response);
 
-            if (response.data.success) {
+            if (response?.data?.success) {
                 const formattedList = response.data.data.map((item) => ({
                     id: item.SERIALNO,
                     anukramank: item.SERIALNO,
@@ -523,11 +523,11 @@ const FrmInwardDocUpload = () => {
 
             const appResponse = await apiService.post("AOIO_INWARD_docUpdt", appPayload);
 
-            if (appResponse.data.success && appResponse.data.errorCode === -100) {
+            if (appResponse?.data?.success && appResponse?.data?.errorCode === -100) {
                 const docResponse = await apiService.post("updateInwardDocumentBlobs", docPayload);
                 const appMessage = appResponse.data.errorMessage;
 
-                if (docResponse.data.success) {
+                if (docResponse?.data?.success) {
                     alert(appMessage + ". " + docResponse.data.message);
                     setAnukramank("");
                     setApplicantInwardId("");

@@ -106,7 +106,7 @@ const FrmInwardRegisterDet = () => {
         appNo,
       });
 
-      if (response.data.success && response.data.data.length > 0) {
+      if (response?.data?.success && response?.data?.data.length > 0) {
         const data = response.data.data[0];
         setValue("applicationId", data.id);
         setValue("date", data.date);
@@ -145,10 +145,10 @@ const FrmInwardRegisterDet = () => {
 
       const response = await apiService.post("", payload);
 
-      if (response.data.success) {
-        alert(response.data.message);
+      if (response?.data?.success) {
+        alert(response?.data?.message);
       } else {
-        alert(response.data.message);
+        alert(response?.data?.message);
       }
     } catch (error) {
       console.error(error);

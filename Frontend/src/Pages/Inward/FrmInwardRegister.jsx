@@ -21,7 +21,7 @@ const FrmInwardRegister = () => {
   const fetchTableData = async () => {
     const response = await apiService.post("", {});
 
-    if (response.data.success && response.data.data.length > 0) {
+    if (response?.data?.success && response?.data?.data.length > 0) {
       const formatted = response.data.data.map((item, index) => ({
         id: index + 1,
         inwardApplication: (

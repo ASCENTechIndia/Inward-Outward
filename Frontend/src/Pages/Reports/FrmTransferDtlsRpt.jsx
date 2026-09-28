@@ -68,10 +68,10 @@ const FrmTransferDtlsRpt = () => {
             const response = await apiService.post("getTransferDetailsReport", payload);
 
 
-            if (response.data.success && response.data.data.length > 0) {
+            if (response?.data?.success && response?.data?.data.length > 0) {
                 setTableData(response.data.data[0]);
 
-                const formatted = response.data.data.map((item, index) => ([
+                const formatted = response?.data?.data.map((item, index) => ([
                     index + 1,
                     item.INWARD_NO || "-",
                     item.FROMUSER || "-",
@@ -84,7 +84,7 @@ const FrmTransferDtlsRpt = () => {
                     item.ACTION || "-"
                 ]));
                 setFormattedData(formatted);
-            } else if (response.data.success && response.data.data.length === 0) {
+            } else if (response?.data?.success && response?.data?.data.length === 0) {
                 alert("No record found");
             }
 

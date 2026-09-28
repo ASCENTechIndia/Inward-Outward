@@ -233,7 +233,7 @@ const FrmInwardRegRpt = () => {
         "ulbId": Number(ulbid)
       });
 
-      if (response.data.success) {
+      if (response?.data?.success) {
         setUlbLogo(response?.data?.data?.ULBLOGO);
         setMunicipalText(response?.data?.data?.ABC_MUNICIPAL_TEXT)
       } 

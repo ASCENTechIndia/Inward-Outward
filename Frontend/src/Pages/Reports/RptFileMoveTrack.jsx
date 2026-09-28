@@ -215,8 +215,8 @@ const RptFileMoveTrack = () => {
         payload,
       );
 
-      if (response.data.success) {
-        setModalTableData(response.data.data);
+      if (response?.data?.success) {
+        setModalTableData(response?.data?.data);
 
         const formatted = response.data.data.map((item, index) => [
           <span
@@ -267,9 +267,9 @@ const RptFileMoveTrack = () => {
       const response = await apiService.post("getInwardNoClickList", payload);
 
       if (
-        response.data.success &&
-        Array.isArray(response.data.data) &&
-        Array.isArray(response.data.ccData)
+        response?.data?.success &&
+        Array.isArray(response?.data?.data) &&
+        Array.isArray(response?.data?.ccData)
       ) {
         setDetailsTableData(response.data.data);
         setCCTableData(response.data.ccData);

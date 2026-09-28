@@ -105,7 +105,7 @@ const FrmInwardTransfer = () => {
                 ulbId: ulbid
             });
 
-            if (response.data.success) {
+            if (response?.data?.success) {
                 const formatted = response.data.data.map(item => ({
                     label: item.VAR_SENDER_NAME,
                     value: item.NUM_SENDER_ID
@@ -131,7 +131,7 @@ const FrmInwardTransfer = () => {
                 }
             );
 
-            if (response.data.success) {
+            if (response?.data?.success) {
                 const formatted = response.data.data.map(item => ({
                     label: item.VAR_SENDERSUBTYPE_NAME,
                     value: Number(item.NUM_SENDERSUBTYPE_ID)
@@ -150,7 +150,7 @@ const FrmInwardTransfer = () => {
 
             const response = await apiService.get("getDocumentTypeDropdown");
 
-            if (response.data.success) {
+            if (response?.data?.success) {
                 const formatted = response.data.data.map(item => ({
                     label: item.VAR_DOCTYPE_NAME,
                     value: item.NUM_DOCTYPE_ID
@@ -172,7 +172,7 @@ const FrmInwardTransfer = () => {
 
             const response = await apiService.get("getDocumentSubTypeDropdown");
             // console.log(response);
-            if (response.data.success) {
+            if (response?.data?.success) {
                 const formatted = response.data.data.map(item => ({
                     label: item.VAR_DOCSUBTYPE_NAME,
                     value: item.NUM_DOCSUBTYPE_ID
@@ -194,7 +194,7 @@ const FrmInwardTransfer = () => {
 
             const response = await apiService.post("getPrabhagDropdown", { ulbid: Number(ulbid) });
             // console.log(response);
-            if (response.data.success) {
+            if (response?.data?.success) {
                 const formatted = response.data.data.map(item => ({
                     label: item.WARDNAME,
                     value: item.WARDID
@@ -216,7 +216,7 @@ const FrmInwardTransfer = () => {
 
             const response = await apiService.post("getMarathiDepartmentDropdown", { ulbid: Number(ulbid) });
 
-            if (response.data.success) {
+            if (response?.data?.success) {
                 const formatted = response.data.data.map(item => ({
                     label: item.DEPT_MARNAME,
                     value: item.DEPTID
@@ -238,7 +238,7 @@ const FrmInwardTransfer = () => {
 
             const response = await apiService.get("getCcPurposeDropdown");
 
-            if (response.data.success) {
+            if (response?.data?.success) {
                 const formatted = response.data.data.map(item => ({
                     label: item.VAR_PURPOSE_NAME,
                     value: item.NUM_PURPOSE_ID
@@ -260,7 +260,7 @@ const FrmInwardTransfer = () => {
 
             const response = await apiService.post("getCcDesignationDropdown", { ulbid: Number(ulbid) });
 
-            if (response.data.success) {
+            if (response?.data?.success) {
                 const formatted = response.data.data.map(item => ({
                     label: item.DESIG_ENAME,
                     value: item.DESIG_ID
@@ -287,7 +287,7 @@ const FrmInwardTransfer = () => {
             const response = await apiService.post("getEmployeeNameDropdown", { ulbid: Number(ulbid), desigId: Number(watchTableDesignation), departmentId: Number(watchTableDepartment) });
             // console.log(watchTableDepartment, watchTableDesignation, selectedTableDesg)
             // console.log(response);
-            if (response.data.success) {
+            if (response?.data?.success) {
                 const formatted = response.data.data.map(item => ({
                     label: item.VAR_USER_USERNAME,
                     value: item.NUM_USER_USERID
@@ -313,7 +313,7 @@ const FrmInwardTransfer = () => {
                 userDeptId: Number(deptId)
             });
 
-            if (response.data.success) {
+            if (response?.data?.success) {
                 const data = response.data.data;
 
                 // console.log("Application Details:", data);
@@ -378,9 +378,7 @@ const FrmInwardTransfer = () => {
 
             const response = await apiService.post("getForwardTransferData", payload);
 
-            console.log(response);
-
-            if (response.data.success) {
+            if (response?.data?.success) {
                 if (!response.data.data.length) {
                     // setValue("action", "F");
                     setForwardApplicationData({});
@@ -461,8 +459,8 @@ const FrmInwardTransfer = () => {
 
             const response = await apiService.post("aoio_transfer_ins", payload);
 
-            if (response.data.success && response.data.errorCode === -100) {
-                alert(response.data.errorMessage);
+            if (response?.data?.success && response?.data?.errorCode === -100) {
+                alert(response?.data?.errorMessage);
                 reset();
                 navigate("/Inward/FrmInwardDtlsCommunication", {
                     replace: true

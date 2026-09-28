@@ -111,7 +111,7 @@ const FrmOutwardRegRpt = () => {
 
             const response = await apiService.post("getOutwardRegReport", payload);
 
-            if (response.data.success && response.data.data.length > 0) {
+            if (response?.data?.success && response?.data?.data.length > 0) {
                 setTableData(response.data.data);
 
                 const formatted = response.data.data.map((item, index) => ([
@@ -129,7 +129,7 @@ const FrmOutwardRegRpt = () => {
                     item.REMARK || ""
                 ]));
                 setFormattedData(formatted);
-            } else if (response.data.success && response.data.data.length === 0) {
+            } else if (response?.data?.success && response.data.data.length === 0) {
                 alert("No record found");
             }
 

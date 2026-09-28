@@ -77,7 +77,7 @@ const FrmInvardDtlsClose = () => {
             }
             const response = await apiService.post("getInwardDetailsList", payload);
 
-            if (response.data.success) {
+            if (response?.data?.success) {
                 if (response.data.data.length === 0) {
                     alert("No Records Found");
                     setShowTable(false);
