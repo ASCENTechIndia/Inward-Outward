@@ -92,10 +92,7 @@ const FrmDocTypeMaster = () => {
         in_source: config.source,
       };
 
-      console.log("Doc Type payload:", payload);
-
       const res = await apiService.post("aoio_doctype_ins", payload);
-      console.log("Doc Type save response:", res);
 
       if (res?.data?.success && res?.data?.errorCode === 9999) {
         alert(res.data.errorMessage);

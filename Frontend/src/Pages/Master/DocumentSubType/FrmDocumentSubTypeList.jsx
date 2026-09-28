@@ -65,7 +65,6 @@ const FrmDocumentSubTypeList = () => {
               docTypeId: item.NUM_DOCTYPE_ID,
               docSubTypeId: item.NUM_DOCSUBTYPE_ID,
               docSubTypeName: item.DOCSUBTYPENAME,
-              mode: 2
             }}
             to={`/Masters/FrmDocumentSubTypeMaster`}
             className="text-blue-600 underline hover:text-blue-800 font-medium"

@@ -24,6 +24,9 @@ const {
   aoio_receiversubcategory_ins,
   getDocumentTypeDropdown,
   getDocumentSubTypeList,
+  aoio_receivercategory_ins,
+  getReceiverDetails,
+  aoio_docsubtype_ins,
 } = require("../../controllers/InwardOutward/masterController");
 const { validate } = require("../../validators/validate");
 const {
@@ -34,6 +37,8 @@ const {
   inwardModeInsSchema,
   outwardModeInsSchema,
   receiverSubCatInsSchema,
+  receiverCategoryInsSchema,
+  docSubtypeInsSchema,
 } = require("../../validators/schemas/masterSchema");
 
 const router = express.Router();
@@ -54,6 +59,12 @@ router.post(
 
 // Receiver category list
 router.get("/getReceiverCategoryList", getReceiverCategoryList);
+router.post("/getReceiverDetails", getReceiverDetails);
+router.post(
+  "/aoio_receivercategory_ins",
+  validate(receiverCategoryInsSchema),
+  aoio_receivercategory_ins,
+);
 
 // Purpose master
 router.get("/gerPurposeMasterList", gerPurposeMasterList);
@@ -95,5 +106,10 @@ router.post(
 // Document Sub Type
 router.get("/getDocumentTypeDropdown", getDocumentTypeDropdown);
 router.post("/getDocumentSubTypeList", getDocumentSubTypeList);
+router.post(
+  "/aoio_docsubtype_ins",
+  validate(docSubtypeInsSchema),
+  aoio_docsubtype_ins,
+);
 
 module.exports = router;

@@ -333,3 +333,111 @@ export const receiverSubCatInsSchema = z.object({
     .trim()
     .min(1, "Source is required"),
 });
+
+export const receiverCategoryInsSchema = z.object({
+  in_user_id: z
+    .string({
+      required_error: "UserId is required",
+      invalid_type_error: "UserId must be a string",
+    })
+    .trim()
+    .min(1, "UserId is required"),
+
+  in_mode: z
+    .number({
+      required_error: "Mode is required",
+      invalid_type_error: "Mode must be a number",
+    })
+    .int("Mode must be an integer"),
+
+  in_receivercategory_id: z
+    .number({ invalid_type_error: "Receiver Category Id must be a number" })
+    .int("Receiver Category Id must be an integer")
+    .nullable()
+    .optional(),
+
+  in_receivercategory_name: z
+    .string({
+      required_error: "Receiver Category Name is required",
+      invalid_type_error: "Receiver Category Name must be a string",
+    })
+    .trim()
+    .min(1, "Receiver Category Name is required"),
+
+  in_ipaddress: z
+    .string({
+      required_error: "IP address is required",
+      invalid_type_error: "IP address must be a string",
+    })
+    .trim()
+    .min(1, "IP address is required"),
+
+  in_source: z
+    .string({
+      required_error: "Source is required",
+      invalid_type_error: "Source must be a string",
+    })
+    .trim()
+    .min(1, "Source is required"),
+});
+
+export const docSubtypeInsSchema = z.object({
+  in_UserId: z
+    .string({
+      required_error: "UserId is required",
+      invalid_type_error: "UserId must be a string",
+    })
+    .trim()
+    .min(1, "UserId is required"),
+
+  in_Mode: z
+    .number({
+      required_error: "Mode is required",
+      invalid_type_error: "Mode must be a number",
+    })
+    .int("Mode must be an integer"),
+
+  in_DocsubtypeId: z
+    .number({ invalid_type_error: "Doc Subtype Id must be a number" })
+    .int("Doc Subtype Id must be an integer")
+    .nullable()
+    .optional(),
+
+  in_DocId: z
+    .number({
+      required_error: "Doc Id is required",
+      invalid_type_error: "Doc Id must be a number",
+    })
+    .int("Doc Id must be an integer"),
+
+  in_DocsubtypeName: z
+    .string({
+      required_error: "Doc Subtype Name is required",
+      invalid_type_error: "Doc Subtype Name must be a string",
+    })
+    .trim()
+    .min(1, "Doc Subtype Name is required"),
+
+  in_UlbId: z
+    .number({
+      required_error: "UlbId is required",
+      invalid_type_error: "UlbId must be a number",
+    })
+    .int("UlbId must be an integer"),
+
+  in_ipaddress: z
+    .string({
+      required_error: "IP address is required",
+      invalid_type_error: "IP address must be a string",
+    })
+    .trim()
+    .min(1, "IP address is required"),
+
+  in_source: z
+    .string({
+      required_error: "Source is required",
+      invalid_type_error: "Source must be a string",
+    })
+    .trim()
+    .min(1, "Source is required"),
+});

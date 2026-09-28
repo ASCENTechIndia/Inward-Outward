@@ -934,6 +934,160 @@ const getDocumentSubTypeList = async (req, res) => {
   }
 };
 
+const getReceiverDetails = async (req, res) => {
+  let connection;
+  try {
+    const { receiverId } = req.body;
+    if (!receiverId) {
+      return res.json({
+        success: false,
+        errorMessage: "Receiver Id is required",
+      });
+    }
+    connection = await getConnection();
+    const query = `select num_receivercategory_id  ,var_receivercategory_name from  aoio_receivercategory_mas where
+        num_receivercategory_id=:receiverId`;
+    const bind = {
+      receiverId: Number(receiverId),
+    };
+    const result = await connection.execute(query, bind, {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+    });
+    res.json({
+      success: true,
+      data: result.rows || [],
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error("Error closing DB connection:", err);
+      }
+    }
+  }
+};
+
+const aoio_receivercategory_ins = async (req, res) => {
+  let connection;
+  try {
+    const payload = req.body;
+    connection = await getConnection();
+
+    const query = `BEGIN 
+      aoio_receivercategory_ins(
+        :in_user_id,
+        :in_mode,
+        :in_receivercategory_id,
+        :in_receivercategory_name,
+        :in_ipaddress,
+        :in_source,
+        :Out_ErrorCode,
+        :Out_ErrorMsg
+      );
+      END;`;
+
+    const bind = {
+      in_user_id: payload.in_user_id,
+      in_mode: payload.in_mode,
+      in_receivercategory_id: payload.in_receivercategory_id,
+      in_receivercategory_name: payload.in_receivercategory_name,
+      in_ipaddress: payload.in_ipaddress,
+      in_source: payload.in_source,
+      Out_ErrorCode: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
+      Out_ErrorMsg: {
+        dir: oracledb.BIND_OUT,
+        type: oracledb.STRING,
+        maxSize: 4000,
+      },
+    };
+
+    const result = await connection.execute(query, bind, { autoCommit: true });
+
+    res.json({
+      success: true,
+      errorCode: result.outBinds.Out_ErrorCode,
+      errorMessage: result.outBinds.Out_ErrorMsg,
+    });
+  } catch (error) {
+    console.error("aoio_sender_ins error:", error);
+    res.status(500).json({ success: false, message: error.message });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error("Error closing DB connection:", err);
+      }
+    }
+  }
+};
+
+const aoio_docsubtype_ins = async (req, res) => {
+  let connection;
+  try {
+    const payload = req.body;
+    connection = await getConnection();
+
+    const query = `BEGIN 
+      aoio_docsubtype_ins(
+        :in_UserId,
+        :in_Mode,
+        :in_DocsubtypeId,
+        :in_DocId,
+        :in_DocsubtypeName,
+        :in_UlbId,
+        :in_ipaddress,
+        :in_source,
+        :Out_ErrorCode,
+        :Out_ErrorMsg
+      );
+      END;`;
+
+    const bind = {
+      in_UserId: payload.in_UserId,
+      in_Mode: Number(payload.in_Mode),
+      in_DocsubtypeId:
+        payload.in_DocsubtypeId == null
+          ? null
+          : Number(payload.in_DocsubtypeId),
+      in_DocId: Number(payload.in_DocId),
+      in_DocsubtypeName: payload.in_DocsubtypeName,
+      in_UlbId: Number(payload.in_UlbId),
+      in_ipaddress: payload.in_ipaddress,
+      in_source: payload.in_source,
+      Out_ErrorCode: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
+      Out_ErrorMsg: {
+        dir: oracledb.BIND_OUT,
+        type: oracledb.STRING,
+        maxSize: 4000,
+      },
+    };
+
+    const result = await connection.execute(query, bind, { autoCommit: true });
+
+    res.json({
+      success: true,
+      errorCode: result.outBinds.Out_ErrorCode,
+      errorMessage: result.outBinds.Out_ErrorMsg,
+    });
+  } catch (error) {
+    console.error("failed to save doc subtype:", error);
+    res.status(500).json({ success: false, message: error.message });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error("Error closing DB connection:", err);
+      }
+    }
+  }
+};
+
 module.exports = {
   senderMasterList,
   getSenderTypeDropdown,
@@ -959,4 +1113,7 @@ module.exports = {
   aoio_receiversubcategory_ins,
   getDocumentTypeDropdown,
   getDocumentSubTypeList,
+  aoio_receivercategory_ins,
+  getReceiverDetails,
+  aoio_docsubtype_ins,
 };
