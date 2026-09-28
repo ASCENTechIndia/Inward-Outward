@@ -113,7 +113,7 @@ const STATIC_MENU = [
       {
         MENUID: 303,
         MENUTITLE: "आवक दस्तऐवज जोडा",
-        PAGEPATH: "/Inward/FrmInwardDtlsDocument"
+        PAGEPATH: "/Inward/FrmInwardDtlsDocument",
       },
       {
         MENUID: 304,
@@ -123,7 +123,7 @@ const STATIC_MENU = [
       {
         MENUID: 305,
         MENUTITLE: "हस्तांतरण किंवा अंतर्गत संप्रेषण",
-        PAGEPATH: "/Inward/FrmInwardDtlsCommunication"
+        PAGEPATH: "/Inward/FrmInwardDtlsCommunication",
       },
     ],
   },
@@ -135,11 +135,6 @@ const STATIC_MENU = [
         MENUID: 401,
         MENUTITLE: "Outward Form",
         PAGEPATH: "/Outward/FrmOutward",
-      },
-      {
-        MENUID: 402,
-        MENUTITLE: "Direct Outward Form",
-        PAGEPATH: "/Outward/FrmDirectOutwardEntry",
       },
     ],
   },
@@ -155,18 +150,18 @@ const STATIC_MENU = [
       {
         MENUID: 502,
         MENUTITLE: "File Movement Tracking",
-        PAGEPATH: "/Reports/RptFileMoveTrack"
+        PAGEPATH: "/Reports/RptFileMoveTrack",
       },
       {
         MENUID: 503,
         MENUTITLE: "हस्तांतरण अहवाल",
-        PAGEPATH: "/Reports/FrmTransferDtlsRpt"
+        PAGEPATH: "/Reports/FrmTransferDtlsRpt",
       },
       {
         MENUID: 504,
         MENUTITLE: "जावक नोंदणी अहवाल",
-        PAGEPATH: "/Reports/FrmOutwardRegRpt"
-      }
+        PAGEPATH: "/Reports/FrmOutwardRegRpt",
+      },
     ],
   },
 ];

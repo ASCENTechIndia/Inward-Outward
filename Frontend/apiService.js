@@ -2,7 +2,8 @@
 import CryptoJS from "crypto-js";
 
 const API_SECRET = "your-secret-key"; // Must match backend
-const BASE_API_URL = "http://localhost:5000";
+const BASE_API_URL = "https://InwardOutwardAPI.nagarkaryavalinewuat.com";
+// const BASE_API_URL = "http://localhost:5000";
 
 const encryptParams = (params) => {
   const jsonString = JSON.stringify(params);
@@ -47,6 +48,7 @@ const apiService = {
     })
       .then((res) => res.json())
       .then((response) => {
+        console.log("backend response :", response)
         const decrypted = decryptResponse(response.payload);
         return { data: decrypted };
       });
