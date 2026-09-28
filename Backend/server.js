@@ -7,7 +7,7 @@ const routes = require("./src/routes/index.js");
 const session = require("express-session");
 const cookieParser = require("cookie-parser");
 const fs = require("fs");
-const path = require("path"); 
+const path = require("path");
 
 const app = express();
 const NODE_ENV = process.env.NODE_ENV || "development";
@@ -21,28 +21,36 @@ app.use((req, res, next) => {
 });
 
 app.use(cookieParser());
- 
+
 // 🔁 Middleware
-app.use(cors({
-  origin: [/\.nagarkaryavalinewuat\.com$/, "http://localhost:5173"],
-  credentials: true
-}));
-app.use(express.json({ limit: '50mb' }));
-app.use(express.urlencoded({ limit: '50mb', extended: true }));
+app.use(
+  cors({
+    origin: [
+      /\.nagarkaryavalinewuat\.com$/,
+      "http://localhost:5173",
+      "https://inwardoutward.nagarkaryavalinewuat.com",
+    ],
+    credentials: true,
+  }),
+);
+app.use(express.json({ limit: "50mb" }));
+app.use(express.urlencoded({ limit: "50mb", extended: true }));
 
 // 🔐 Session (must be before route usage)
-app.use(session({
-  secret: SESSION_SECRET,
-  resave: false,
-  saveUninitialized: false,
-  cookie: {
-    httpOnly: true,
-    secure: IS_PROD, // Set true in production (HTTPS)
-    sameSite: "Strict",
-    domain: ".nagarkaryavalinewuat.com", // Shared domain for all modules
-    maxAge: 60 * 60 * 1000 // 1 hour
-  }
-}));
+app.use(
+  session({
+    secret: SESSION_SECRET,
+    resave: false,
+    saveUninitialized: false,
+    cookie: {
+      httpOnly: true,
+      secure: IS_PROD, // Set true in production (HTTPS)
+      sameSite: "Strict",
+      domain: ".nagarkaryavalinewuat.com", // Shared domain for all modules
+      maxAge: 60 * 60 * 1000, // 1 hour
+    },
+  }),
+);
 logger.info("Session middleware initialized");
 
 // 🔗 Routes
@@ -52,13 +60,13 @@ logger.info("Routes loaded");
 
 // 🔌 Initialize DB Connection
 // Catch unhandled exceptions
-process.on('uncaughtException', (err) => {
-  logger.error('Uncaught Exception:', err);
+process.on("uncaughtException", (err) => {
+  logger.error("Uncaught Exception:", err);
   process.exit(1); // optional: exit process
 });
 
-process.on('unhandledRejection', (reason, promise) => {
-  logger.error('Unhandled Rejection:', reason);
+process.on("unhandledRejection", (reason, promise) => {
+  logger.error("Unhandled Rejection:", reason);
 });
 db.initialize()
   .then(() => {
