@@ -95,8 +95,10 @@ const FrmTransferDtlsRpt = () => {
         setFormattedData(formatted);
       } else if (response?.data?.success && response?.data?.data.length === 0) {
         alert("No record found");
+        setFormattedData([]);
       }
     } catch (error) {
+      setFormattedData([]);
       console.error(error);
       alert(error.message || "Failed to fetch details");
     } finally {
@@ -170,7 +172,7 @@ const FrmTransferDtlsRpt = () => {
             </div>
           </div>
         </div>
-        {formattedData.length >= 0 && (
+        {formattedData.length > 0 && (
           <>
             <div className="flex justify-start gap-2 pt-4 border-t border-slate-200 mt-3">
               <Excel
