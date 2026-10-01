@@ -868,6 +868,9 @@ const FrmInwardTransfer = () => {
                     </Button>
                     <Button
                         type="button"
+                        onClick={() => navigate("/Inward/FrmInwardDtlsCommunication", {
+                            replace: true
+                        })}
                     >
                         बदल
                     </Button>
