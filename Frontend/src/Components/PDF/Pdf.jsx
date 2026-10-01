@@ -18,34 +18,21 @@ Font.register({
   src: "/fonts/NotoSansDevanagari-Regular.ttf",
 });
 
-
-
 const PAGE_WIDTH = 842; // A4 landscape width
 const PAGE_HEIGHT = 595; // A4 landscape height
 
 const PAGE_PADDING_LEFT = 12;
 const PAGE_PADDING_RIGHT = 12;
 
-const CONTENT_WIDTH =
-  PAGE_WIDTH -
-  PAGE_PADDING_LEFT -
-  PAGE_PADDING_RIGHT;
-
-
+const CONTENT_WIDTH = PAGE_WIDTH - PAGE_PADDING_LEFT - PAGE_PADDING_RIGHT;
 
 const safe = (value, fallback = "—") => {
-  if (
-    value === undefined ||
-    value === null ||
-    value === ""
-  ) {
+  if (value === undefined || value === null || value === "") {
     return fallback;
   }
 
   return String(value);
 };
-
-
 
 const wrapText = (value, width, fontSize = 6) => {
   const text = safe(value);
@@ -55,20 +42,11 @@ const wrapText = (value, width, fontSize = 6) => {
   }
 
   // Account for left/right cell padding
-  const availableWidth = Math.max(
-    width - 4,
-    5
-  );
+  const availableWidth = Math.max(width - 4, 5);
 
-  const averageCharWidth =
-    fontSize * 0.65;
+  const averageCharWidth = fontSize * 0.65;
 
-  const maxChars = Math.max(
-    2,
-    Math.floor(
-      availableWidth / averageCharWidth
-    )
-  );
+  const maxChars = Math.max(2, Math.floor(availableWidth / averageCharWidth));
 
   const words = text.split(/\s+/);
 
@@ -76,10 +54,7 @@ const wrapText = (value, width, fontSize = 6) => {
   let currentLine = "";
 
   for (const word of words) {
-
-    
     if (word.length > maxChars) {
-
       if (currentLine) {
         lines.push(currentLine);
         currentLine = "";
@@ -88,15 +63,9 @@ const wrapText = (value, width, fontSize = 6) => {
       let remaining = word;
 
       while (remaining.length > maxChars) {
-        lines.push(
-          remaining.substring(
-            0,
-            maxChars
-          )
-        );
+        lines.push(remaining.substring(0, maxChars));
 
-        remaining =
-          remaining.substring(maxChars);
+        remaining = remaining.substring(maxChars);
       }
 
       currentLine = remaining;
@@ -104,14 +73,11 @@ const wrapText = (value, width, fontSize = 6) => {
       continue;
     }
 
-    const testLine = currentLine
-      ? `${currentLine} ${word}`
-      : word;
+    const testLine = currentLine ? `${currentLine} ${word}` : word;
 
     if (testLine.length <= maxChars) {
       currentLine = testLine;
     } else {
-
       if (currentLine) {
         lines.push(currentLine);
       }
@@ -127,7 +93,6 @@ const wrapText = (value, width, fontSize = 6) => {
   return lines.join("\n");
 };
 
-
 const styles = StyleSheet.create({
   page: {
     paddingTop: 15,
@@ -138,7 +103,6 @@ const styles = StyleSheet.create({
     fontSize: 6,
     fontFamily: "NotoMarathi",
   },
-
 
   header: {
     flexDirection: "row",
@@ -191,7 +155,6 @@ const styles = StyleSheet.create({
     fontSize: 6,
     color: "#555",
   },
-
 
   table: {
     width: "100%",
@@ -255,7 +218,6 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
 
-
   footer: {
     position: "absolute",
 
@@ -274,7 +236,6 @@ const styles = StyleSheet.create({
     paddingTop: 3,
   },
 });
-
 
 const TablePDF = ({
   tableHeader = [],
@@ -300,127 +261,70 @@ const TablePDF = ({
    */
   columnWidths = [],
 }) => {
-  const today =
-    new Date().toLocaleDateString("en-GB");
+  const today = new Date().toLocaleDateString("en-GB");
 
   // ------------------------------------------------
   // COLUMN WIDTH
   // ------------------------------------------------
 
   const getColumnWidth = (index) => {
-    if (
-      columnWidths &&
-      columnWidths[index]
-    ) {
+    if (columnWidths && columnWidths[index]) {
       return columnWidths[index];
     }
 
     return `${100 / tableHeader.length}%`;
   };
 
-
   const getColumnWidthInPoints = (index) => {
     const width = getColumnWidth(index);
 
-    if (
-      typeof width === "string" &&
-      width.endsWith("%")
-    ) {
-      const percentage =
-        parseFloat(width);
+    if (typeof width === "string" && width.endsWith("%")) {
+      const percentage = parseFloat(width);
 
-      return (
-        CONTENT_WIDTH *
-        (percentage / 100)
-      );
+      return CONTENT_WIDTH * (percentage / 100);
     }
-
 
     if (typeof width === "number") {
       return width;
     }
 
-    return (
-      CONTENT_WIDTH /
-      tableHeader.length
-    );
+    return CONTENT_WIDTH / tableHeader.length;
   };
 
   return (
     <Document>
-
-      <Page
-        size="A4"
-        orientation="landscape"
-        style={styles.page}
-      >
-
-
+      <Page size="A4" orientation="landscape" style={styles.page}>
         <View style={styles.header}>
-
           {logoUrl ? (
-            <Image
-              src={logoUrl}
-              style={styles.logo}
-            />
+            <Image src={logoUrl} style={styles.logo} />
           ) : (
-            <View
-              style={styles.logoPlaceholder}
-            />
+            <View style={styles.logoPlaceholder} />
           )}
 
-          <View
-            style={styles.titleSection}
-          >
+          <View style={styles.titleSection}>
             <Text style={styles.ulbName}>
-              {safe(
-                ulbName,
-                "Municipal Corporation"
-              )}
+              {safe(ulbName, "Municipal Corporation")}
             </Text>
 
-            <Text
-              style={styles.reportTitle}
-            >
-              {safe(
-                reportTitle,
-                "Report"
-              )}
+            <Text style={styles.reportTitle}>
+              {safe(reportTitle, "Report")}
             </Text>
           </View>
 
-          <View
-            style={styles.logoPlaceholder}
-          />
-
+          <View style={styles.logoPlaceholder} />
         </View>
 
         {(dateRange || userName) && (
           <View style={styles.metaRow}>
+            <Text>{dateRange ? `दिनांक: ${dateRange}` : ""}</Text>
 
-            <Text>
-              {dateRange
-                ? `दिनांक: ${dateRange}`
-                : ""}
-            </Text>
-
-            <Text>
-              {userName
-                ? `वापरकर्ता: ${userName}`
-                : ""}
-            </Text>
-
+            <Text>{userName ? `वापरकर्ता: ${userName}` : ""}</Text>
           </View>
         )}
 
-
         <View style={styles.table}>
-
           {/* TABLE HEADER */}
-          <View
-            style={styles.tableHeaderRow}
-            fixed
-          >
+          <View style={styles.tableHeaderRow} fixed>
             {tableHeader.map((header, index) => {
               const width = getColumnWidth(index);
 
@@ -436,11 +340,7 @@ const TablePDF = ({
                     },
                   ]}
                 >
-                  {wrapText(
-                    header,
-                    getColumnWidthInPoints(index),
-                    6
-                  )}
+                  {wrapText(header, getColumnWidthInPoints(index), 6)}
                 </Text>
               );
             })}
@@ -449,18 +349,13 @@ const TablePDF = ({
           {/* TABLE BODY */}
           {tableData && tableData.length > 0 ? (
             tableData.map((row, rowIndex) => (
-              <View
-                key={rowIndex}
-                style={styles.tableRow}
-                wrap={false}
-              >
+              <View key={rowIndex} style={styles.tableRow} wrap={false}>
                 {tableHeader.map((_, cellIndex) => {
                   const cell = row[cellIndex];
 
                   const width = getColumnWidth(cellIndex);
 
-                  const widthInPoints =
-                    getColumnWidthInPoints(cellIndex);
+                  const widthInPoints = getColumnWidthInPoints(cellIndex);
 
                   return (
                     <Text
@@ -474,51 +369,32 @@ const TablePDF = ({
                         },
                       ]}
                     >
-                      {wrapText(
-                        cell,
-                        widthInPoints,
-                        6
-                      )}
+                      {wrapText(cell, widthInPoints, 6)}
                     </Text>
                   );
                 })}
               </View>
             ))
           ) : (
-            <View
-              style={styles.tableRow}
-              wrap={false}
-            >
-              <Text
-                style={[
-                  styles.tableCell,
-                  styles.noData,
-                ]}
-              >
+            <View style={styles.tableRow} wrap={false}>
+              <Text style={[styles.tableCell, styles.noData]}>
                 No data available
               </Text>
             </View>
           )}
         </View>
 
-
         <Text
           style={styles.footer}
           fixed
-          render={({
-            pageNumber,
-            totalPages,
-          }) =>
+          render={({ pageNumber, totalPages }) =>
             `Generated on ${today} | Page ${pageNumber} of ${totalPages}`
           }
         />
-
       </Page>
-
     </Document>
   );
 };
-
 
 const Pdf = ({
   tableHeader = [],
@@ -530,16 +406,12 @@ const Pdf = ({
   logoUrl,
   reportTitle,
 
-  dateRange,
+  dateRange = "",
   userName,
 
   columnWidths = [],
 }) => {
-
-  if (
-    !tableData ||
-    tableData.length === 0
-  ) {
+  if (!tableData || tableData.length === 0) {
     return (
       <button
         disabled
@@ -559,7 +431,6 @@ const Pdf = ({
         "
       >
         <Download className="w-4 h-4" />
-
         Export to PDF
       </button>
     );
@@ -571,17 +442,12 @@ const Pdf = ({
         <TablePDF
           tableHeader={tableHeader}
           tableData={tableData}
-
           ulbName={ulbName}
           logoUrl={logoUrl}
           reportTitle={reportTitle}
-
           dateRange={dateRange}
           userName={userName}
-
-          columnWidths={
-            columnWidths
-          }
+          columnWidths={columnWidths}
         />
       }
       fileName={fileName}
@@ -589,16 +455,9 @@ const Pdf = ({
         textDecoration: "none",
       }}
     >
-      {({
-        loading,
-        error,
-      }) => {
-
+      {({ loading, error }) => {
         if (error) {
-          console.error(
-            "PDF generation error:",
-            error
-          );
+          console.error("PDF generation error:", error);
         }
 
         return (
@@ -623,9 +482,7 @@ const Pdf = ({
           >
             <Download className="w-4 h-4" />
 
-            {loading
-              ? "Preparing..."
-              : "Export to PDF"}
+            {loading ? "Preparing..." : "Export to PDF"}
           </button>
         );
       }}
