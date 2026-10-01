@@ -76,7 +76,6 @@ const FrmInvardDtlsClose = () => {
   const handleSearch = async (data) => {
     try {
       setLoading(true);
-      console.log(data);
 
       const payload = {
         fromDate: formatDate(data.fromDate),
@@ -97,14 +96,14 @@ const FrmInvardDtlsClose = () => {
 
         // }
         const formatted = response.data.data.map((item) => ({
-          id: item.id,
-          number: item.number,
-          date: item.date,
-          refno: item.refno,
-          refdate: item.refdt,
-          mobileno: item.mobileno,
-          subject: item.subject,
-          letterType: item.letterType,
+          id: item.INWARDID || "",
+          number: item.INWORD_NO || "",
+          date: item.INWARDDATE || "",
+          refno: item.REF_NO || "",
+          refdate: item.REF_DATE || "",
+          mobileno: item.MOBILE_NO || "",
+          subject: item.SUBJECT || "",
+          letterType: item.LETTERTYPE || "",
           nivda: (
             <div className="flex justify-center items-center px-3 py-2">
               <button
@@ -114,7 +113,7 @@ const FrmInvardDtlsClose = () => {
                 onClick={() => {
                   navigate("/Inward/FrmInwardClose", {
                     state: {
-                      invardNo: item.number,
+                      invardNo: item.INWORD_NO,
                     },
                   });
                 }}
