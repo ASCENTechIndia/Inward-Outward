@@ -17,6 +17,8 @@ const {
   getTransferFormData,
   getForwardTransferData,
   aoio_transfer_ins,
+  getInwardCloseList,
+  getInwardClosePopupData,
 } = require("../../controllers/InwardOutward/inwardController");
 const { validate } = require("../../validators/validate");
 const {
@@ -38,6 +40,8 @@ router.post("/aoio_inward_ins", validate(aoioInwardInsSchema), aoio_inward_ins);
 router.post("/insertInwardDocuments", insertInwardDocuments);
 router.post("/getInwardDetailsList", getInwardDetailsList);
 router.post("/getInwarListTwo", getInwarListTwo);
+router.post("/getInwardCloseList", getInwardCloseList);
+router.post("/getInwardClosePopupData", getInwardClosePopupData);
 router.post("/getInwarDocUploadList", getInwarDocUploadList);
 router.post("/getExistingDocList", getExistingDocList);
 router.post(

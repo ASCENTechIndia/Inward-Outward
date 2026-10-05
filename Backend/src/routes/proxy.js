@@ -6,8 +6,8 @@ const fetch = (...args) => import('node-fetch').then(({ default: fetch }) => fet
 const router = express.Router();
 
 const API_SECRET = "your-secret-key";
-const BASE_API_URL = "https://InwardOutwardAPI.nagarkaryavalinewuat.com/";
-// const BASE_API_URL = "http://localhost:5000/";
+// const BASE_API_URL = "https://InwardOutwardAPI.nagarkaryavalinewuat.com/";
+const BASE_API_URL = "http://localhost:5000/";
 
 
 function decryptPayload(encryptedText) {

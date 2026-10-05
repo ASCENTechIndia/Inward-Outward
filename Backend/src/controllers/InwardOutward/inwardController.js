@@ -459,6 +459,115 @@ const getInwarListTwo = async (req, res) => {
   }
 };
 
+const getInwardCloseList = async (req, res) => {
+  let connection;
+  try {
+    const { userId, ulbid, inwardNo } = req.body;
+    if (!userId) {
+      return res.json({ success: false, errorMessage: "UserId is required" });
+    }
+    if (!ulbid) {
+      return res.json({ success: false, errorMessage: "UserId is required" });
+    }
+    if (!inwardNo) {
+      return res.json({
+        success: false,
+        errorMessage: "Inward number is required",
+      });
+    }
+    connection = await getConnection();
+    const query = `select distinct aim.num_inward_inwardid inwardid, aim.num_inward_inwardno  INWORD_NO,AIM.date_inward_inwdate INWARDDATE,
+    AIM.var_inward_refno REF_NO,AIM.date_inward_refdate REF_DATE,AIM.num_inward_mobile MOBILE_NO,AIM.var_inward_subject SUBJECT,
+    num_tracker_touser UserId,var_inward_lettertype LetterType,VAR_LETTERTYPE_TYPE
+    from aoio_inward_mas aim
+    LEFT JOIN  aoio_lettertype_det letr on letr.NUM_LETTERTYPE_ID = var_inward_lettertype 
+    inner join aoio_tracker_det on num_tracker_inwardid= aim.num_inward_inwardid and
+    var_tracker_inwardno=aim.num_inward_inwardno and var_tracker_status=var_inward_status  
+    where   var_inward_status <>'C' and num_iinward_ulbid=:ulbid
+    and num_tracker_touser=:userId
+    and aim.num_inward_inwardno = :inwardNo `;
+
+    const bind = {
+      ulbid: Number(ulbid),
+      userId,
+      inwardNo,
+    };
+    const result = await connection.execute(query, bind, {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+    });
+    res.json({
+      success: true,
+      data: result.rows || [],
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error("Error closing DB connection:", err);
+      }
+    }
+  }
+};
+
+const getInwardClosePopupData = async (req, res) => {
+  let connection;
+  try {
+    const { ulbid, inwardNo, inwardId } = req.body;
+    if (!ulbid) {
+      return res.json({ success: false, errorMessage: "UserId is required" });
+    }
+    if (!inwardNo) {
+      return res.json({
+        success: false,
+        errorMessage: "Inward number is required",
+      });
+    }
+    if (!inwardId) {
+      return res.json({
+        success: false,
+        errorMessage: "Inward Id is required",
+      });
+    }
+    connection = await getConnection();
+    const query = `select num_inward_inwardid,num_inward_inwardno,date_inward_inwdate,num_inward_senderid,
+    num_inward_sendersubtypeid,num_inward_doctype, 
+    num_inward_docsubtype,var_inward_refno,date_inward_refdate,var_inward_from,var_inward_subject,
+    var_inward_lettertype,var_lettertype_type 
+    from aoio_inward_mas 
+    LEFT JOIN aoio_lettertype_det letr ON letr.num_lettertype_id = var_inward_lettertype 
+    where num_inward_inwardno=:inwardNo  and num_inward_inwardid=:inwardId
+    and num_iinward_ulbid=:ulbid`;
+
+    const bind = {
+      ulbid: Number(ulbid),
+      inwardId: Number(inwardId),
+      inwardNo,
+    };
+    const result = await connection.execute(query, bind, {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+    });
+    res.json({
+      success: true,
+      data: result.rows || [],
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error("Error closing DB connection:", err);
+      }
+    }
+  }
+};
+
 const getInwarDocUploadList = async (req, res) => {
   let connection;
   try {
@@ -1079,4 +1188,6 @@ module.exports = {
   getTransferFormData,
   getForwardTransferData,
   aoio_transfer_ins,
+  getInwardCloseList,
+  getInwardClosePopupData,
 };

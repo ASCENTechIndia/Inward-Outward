@@ -8,6 +8,7 @@ const {
   getTransferDetailsReport,
   getOutwardRegReport,
 } = require("../../controllers/InwardOutward/reportController");
+const { getInwardClosePopupData } = require("../../controllers/InwardOutward/inwardController");
 
 const router = express.Router();
 
