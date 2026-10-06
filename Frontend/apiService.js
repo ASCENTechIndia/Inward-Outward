@@ -3,7 +3,8 @@ import CryptoJS from "crypto-js";
 
 const API_SECRET = "your-secret-key"; // Must match backend
 // const BASE_API_URL = "https://InwardOutwardAPI.nagarkaryavalinewuat.com";
-const BASE_API_URL = "http://localhost:5000";
+// const BASE_API_URL = "http://localhost:5000";
+const BASE_API_URL = import.meta.env.VITE_API_BASE_URL;
 
 const encryptParams = (params) => {
   const jsonString = JSON.stringify(params);
