@@ -6,7 +6,20 @@ const PieChart = ({
     height = "300px",
 }) => {
 
+    const colors = [
+        "#3D71F5",
+        "#FCB441",
+        "#1ACA68",
+        "#D52736",
+        "#737CBF",
+        "#8E44AD",
+        "#00A8CC",
+        "#FF6B6B",
+    ];
+
     const option = {
+        color: colors,
+
         tooltip: {
             trigger: "item",
             formatter: "{b}: {c} ({d}%)",
@@ -23,7 +36,6 @@ const PieChart = ({
                 type: "pie",
                 radius: ["0%", "60%"],
                 center: ["50%", "45%"],
-
                 data: data,
 
                 emphasis: {
