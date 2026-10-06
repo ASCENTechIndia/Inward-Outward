@@ -29,4 +29,7 @@ router.use("/", inwardRoutes);
 const reportRoutes = require("./InwardOutward/reportRoutes.js");
 router.use("/", reportRoutes);
 
+const dashboardRoutes = require("./InwardOutward/dashboardRoutes.js")
+router.use("/", dashboardRoutes)
+
 module.exports = router;
