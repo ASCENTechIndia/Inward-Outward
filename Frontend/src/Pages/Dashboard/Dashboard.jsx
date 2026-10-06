@@ -13,8 +13,18 @@ import { useLoader } from "../../Context/LoaderContext";
 
 const formatDate = (date) => {
   const months = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
   ];
 
   const day = String(date.getDate()).padStart(2, "0");
@@ -24,23 +34,16 @@ const formatDate = (date) => {
   return `${day}-${month}-${year}`;
 };
 
-
-
 const getMonthDateRange = () => {
   const today = new Date();
 
-  const startDate = new Date(
-    today.getFullYear(),
-    today.getMonth(),
-    1
-  );
+  const startDate = new Date(today.getFullYear(), today.getMonth(), 1);
 
   return {
     fromDate: formatDate(startDate),
-    toDate: formatDate(today)
+    toDate: formatDate(today),
   };
 };
-
 
 const getYearDateRange = () => {
   const year = new Date().getFullYear();
@@ -50,7 +53,7 @@ const getYearDateRange = () => {
 
   return {
     fromDate: formatDate(startDate),
-    toDate: formatDate(endDate)
+    toDate: formatDate(endDate),
   };
 };
 
@@ -67,7 +70,13 @@ const Dashboard = () => {
   const [yearCount, setYearCount] = useState([]);
 
   const [tableData, setTableData] = useState([]);
-  const [tableHeader, setTableHeader] = useState(["Department Name", "Total", "Open", "Closed", "Forward"]);
+  const [tableHeader, setTableHeader] = useState([
+    "Department Name",
+    "Total",
+    "Open",
+    "Closed",
+    "Forward",
+  ]);
   const [pieChartData, setPieChartData] = useState([]);
 
   const fetchDepartmentTableData = async () => {
@@ -77,69 +86,86 @@ const Dashboard = () => {
       const response = await apiService.get("getDashboardAllDepartmentList");
 
       if (response?.data?.success && Array.isArray(response?.data?.data)) {
-        const formatted = response.data.data.map(item => ([
+        const formatted = response.data.data.map((item) => [
           item.DEPTNAME,
           item.TOTAL,
           item.INW_OPEN,
           item.INW_CLOSE,
-          item.INW_FORWARD
-        ]));
+          item.INW_FORWARD,
+        ]);
 
-        const formattedPieChartData = response.data.data.map(item => ({
+        const formattedPieChartData = response.data.data.map((item) => ({
           name: item.DEPTNAME,
-          value: item.TOTAL
-        }))
+          value: item.TOTAL,
+        }));
 
         setTableData(formatted);
         setPieChartData(formattedPieChartData);
+      } else {
+        setTableData([]);
+        setPieChartData([]);
       }
     } catch (error) {
+      setTableData([]);
+      setPieChartData([]);
       console.error(error);
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   const fetchCardData = async () => {
     try {
       setLoading(true);
-      
-      const payload = {
-        "fromMonth": getMonthDateRange().fromDate,
-        "toMonth": getMonthDateRange().toDate,
-        "fromYear": getYearDateRange().fromDate,
-        "toYear": getYearDateRange().toDate
-      }
 
-      const response = await apiService.post("getDashboardSummaryCounts", payload);
+      const payload = {
+        fromMonth: getMonthDateRange().fromDate,
+        toMonth: getMonthDateRange().toDate,
+        fromYear: getYearDateRange().fromDate,
+        toYear: getYearDateRange().toDate,
+      };
+
+      const response = await apiService.post(
+        "getDashboardSummaryCounts",
+        payload,
+      );
 
       if (response?.data?.success) {
         setDayCount([
-          { category: "Inward", count: response.data.data.today.inward },
-          { category: "Outward", count: response.data.data.today.close }
+          { category: "Inward", count: response.data.data.today.inward || 0 },
+          { category: "Outward", count: response.data.data.today.close || 0 },
         ]);
 
         setWeekCount([
-          { category: "Inward", count: response.data.data.week.inward },
-          { category: "Outward", count: response.data.data.week.close }
+          { category: "Inward", count: response.data.data.week.inward || 0 },
+          { category: "Outward", count: response.data.data.week.close || 0 },
         ]);
 
         setMonthCount([
-          { category: "Inward", count: response.data.data.month.inward },
-          { category: "Outward", count: response.data.data.month.close }
+          { category: "Inward", count: response.data.data.month.inward || 0 },
+          { category: "Outward", count: response.data.data.month.close || 0 },
         ]);
 
         setYearCount([
-          { category: "Inward", count: response.data.data.year.inward},
-          { category: "Outward", count: response.data.data.year.close}
+          { category: "Inward", count: response.data.data.year.inward || 0 },
+          { category: "Outward", count: response.data.data.year.close || 0 },
         ]);
+      } else {
+        setMonthCount([]);
+        setDayCount([]);
+        setWeekCount([]);
+        setYearCount([]);
       }
     } catch (error) {
+      setMonthCount([]);
+      setDayCount([]);
+      setWeekCount([]);
+      setYearCount([]);
       console.error(error);
     } finally {
       setLoading(false);
     }
-  }
+  };
 
   useEffect(() => {
     fetchDepartmentTableData();
@@ -185,9 +211,7 @@ const Dashboard = () => {
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <Card title="All Departments: Statistical View">
-            <PieChart
-              data={pieChartData}
-            />
+            <PieChart data={pieChartData} />
           </Card>
 
           <Card title="All Departments: Status View">
@@ -195,16 +219,14 @@ const Dashboard = () => {
               <table className="w-full border-collapse">
                 <thead>
                   <tr className="bg-slate-100 border-b border-slate-200">
-                    {tableHeader.map(
-                      (header) => (
-                        <th
-                          key={header}
-                          className="px-4 py-3 text-sm font-bold text-slate-600 text-left"
-                        >
-                          {header}
-                        </th>
-                      )
-                    )}
+                    {tableHeader.map((header) => (
+                      <th
+                        key={header}
+                        className="px-4 py-3 text-sm font-bold text-slate-600 text-left"
+                      >
+                        {header}
+                      </th>
+                    ))}
                   </tr>
                 </thead>
 
@@ -243,7 +265,7 @@ const Dashboard = () => {
                       >
                         {tableData.reduce(
                           (sum, row) => sum + Number(row[columnIndex] || 0),
-                          0
+                          0,
                         )}
                       </td>
                     ))}
@@ -254,7 +276,6 @@ const Dashboard = () => {
           </Card>
         </div>
       </div>
-
     </Layout>
   );
 };
