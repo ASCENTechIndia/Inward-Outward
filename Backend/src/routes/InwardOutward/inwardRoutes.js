@@ -19,6 +19,7 @@ const {
   aoio_transfer_ins,
   getInwardCloseList,
   getInwardClosePopupData,
+  aoio_inwardclose_ins,
 } = require("../../controllers/InwardOutward/inwardController");
 const { validate } = require("../../validators/validate");
 const {
@@ -26,6 +27,7 @@ const {
   inwardDocUpdtSchema,
   updateInwardDocumentBlobsSchema,
   inwardTransferInsSchema,
+  inwardCloseInsSchema,
 } = require("../../validators/schemas/inwardInsSchema");
 
 const router = express.Router();
@@ -42,6 +44,11 @@ router.post("/getInwardDetailsList", getInwardDetailsList);
 router.post("/getInwarListTwo", getInwarListTwo);
 router.post("/getInwardCloseList", getInwardCloseList);
 router.post("/getInwardClosePopupData", getInwardClosePopupData);
+router.post(
+  "/aoio_inwardclose_ins",
+  validate(inwardCloseInsSchema),
+  aoio_inwardclose_ins,
+);
 router.post("/getInwarDocUploadList", getInwarDocUploadList);
 router.post("/getExistingDocList", getExistingDocList);
 router.post(

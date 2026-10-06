@@ -568,6 +568,58 @@ const getInwardClosePopupData = async (req, res) => {
   }
 };
 
+const aoio_inwardclose_ins = async (req, res) => {
+  let connection;
+  try {
+    const payload = req.body;
+    connection = await getConnection();
+
+    const query = `BEGIN 
+      aoio_inwardclose_ins(
+      :IN_USERID,
+      :IN_inwardid,
+      :IN_INWARDNO,
+      :in_orgId,
+      :out_ErrorCode,
+      :out_ErrorMsg
+      );
+      END;`;
+
+    const bind = {
+      IN_USERID: payload.IN_USERID,
+      IN_inwardid: payload.IN_inwardid,
+      IN_INWARDNO: payload.IN_INWARDNO,
+      in_orgId: payload.in_orgId,
+      out_ErrorCode: { dir: oracledb.BIND_OUT, type: oracledb.NUMBER },
+      out_ErrorMsg: {
+        dir: oracledb.BIND_OUT,
+        type: oracledb.STRING,
+        maxSize: 4000,
+      },
+    };
+
+    const result = await connection.execute(query, bind, { autoCommit: true });
+
+    res.json({
+      success: true,
+      errorCode: result.outBinds.out_ErrorCode,
+      errorMessage: result.outBinds.out_ErrorMsg,
+      inwardImgId: result.outBinds.out_inwardimgid,
+    });
+  } catch (error) {
+    console.error("failed to save inward data:", error);
+    res.status(500).json({ success: false, message: error.message });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error("Error closing DB connection:", err);
+      }
+    }
+  }
+};
+
 const getInwarDocUploadList = async (req, res) => {
   let connection;
   try {
@@ -1190,4 +1242,5 @@ module.exports = {
   aoio_transfer_ins,
   getInwardCloseList,
   getInwardClosePopupData,
+  aoio_inwardclose_ins,
 };

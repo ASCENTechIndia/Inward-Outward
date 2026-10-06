@@ -338,3 +338,35 @@ export const inwardTransferInsSchema = z.object({
     })
     .int("Ulb Id must be an integer"),
 });
+
+export const inwardCloseInsSchema = z.object({
+  IN_USERID: z
+    .string({
+      required_error: "UserId is required",
+      invalid_type_error: "UserId must be a string",
+    })
+    .trim()
+    .min(1, "UserId is required"),
+
+  IN_inwardid: z
+    .number({
+      required_error: "Inward Id is required",
+      invalid_type_error: "Inward Id must be a number",
+    })
+    .int("Inward Id must be an integer"),
+
+  IN_INWARDNO: z
+    .string({
+      required_error: "Inward No is required",
+      invalid_type_error: "Inward No must be a string",
+    })
+    .trim()
+    .min(1, "Inward No is required"),
+
+  in_orgId: z
+    .number({
+      required_error: "Org Id is required",
+      invalid_type_error: "Org Id must be a number",
+    })
+    .int("Org Id must be an integer"),
+});

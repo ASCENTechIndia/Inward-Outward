@@ -277,38 +277,31 @@ const FrmInwardClose = () => {
   const handleModalSubmit = async (data) => {
     try {
       setLoading(true);
-      console.log("Inward Close Submit Payload:", data);
 
-      // TODO: Uncomment when the save API is ready
-      //
-      // const payload = {
-      //   ulbid: Number(ulbid),
-      //   userId: String(userId),
-      //   inwardId: data.inwardId,
-      //   inwardNo: data.inwardNo,
-      //   senderId: data.sender ? Number(data.sender) : null,
-      //   subTypeId: data.subtype ? Number(data.subtype) : null,
-      //   docTypeId: data.docType ? Number(data.docType) : null,
-      //   docSubTypeId: data.docSubType ? Number(data.docSubType) : null,
-      //   refNo: data.refNo,
-      //   refDate: data.refDate,
-      //   from: data.from,
-      //   subject: data.subject,
-      //   letterType: data.letterType,
-      // };
-      //
-      // const response = await apiService.post("saveInwardClose", payload);
-      //
-      // if (response?.data?.success) {
-      //   alert(response.data.message || "Saved successfully");
-      //   setShowInwardDetailsModal(false);
-      //   reset();
-      //   fetchInwardCloseList();
-      // } else {
-      //   alert(response.data.message || "Failed to save");
-      // }
+      const payload = {
+        IN_USERID: String(userId),
+        IN_inwardid: Number(data.inwardId),
+        IN_INWARDNO: data.inwardNo,
+        in_orgId: Number(ulbid),
+      };
+
+      const response = await apiService.post("aoio_inwardclose_ins", payload);
+
+      if (response?.data?.success) {
+        alert(
+          response.data.errorMessage || "Inward details updated successfully",
+        );
+        setShowInwardDetailsModal(false);
+        reset();
+        navigate("/Inward/FrmInwardDtlsClose");
+      } else {
+        alert(
+          response?.data?.errorMessage || "Failed to update inward details",
+        );
+      }
     } catch (error) {
-      console.error(error);
+      console.error("Error submitting inward close:", error);
+      alert(error?.message || "Failed to update inward close details");
     } finally {
       setLoading(false);
     }
@@ -370,7 +363,6 @@ const FrmInwardClose = () => {
       }}
     >
       <div className="w-full space-y-6">
-        {/* Search row */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label text="आवक क्र. : " />
@@ -398,14 +390,12 @@ const FrmInwardClose = () => {
           </div>
         </div>
 
-        {/* Export */}
         <div className="mt-3">
           <Button type="button" onClick={handleExportToExcel}>
             Export to Excel
           </Button>
         </div>
 
-        {/* TABLE */}
         <div className="mt-3">
           <div className="rounded-xl border border-slate-200 overflow-hidden">
             <div className="overflow-x-auto">
@@ -488,7 +478,6 @@ const FrmInwardClose = () => {
           </div>
         </div>
 
-        {/* MODAL */}
         {showInwardDetailsModal && (
           <div
             className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm p-4"
