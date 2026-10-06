@@ -17,6 +17,7 @@ const StatCard = ({
                     style={{
                         fontSize: "18px",
                         fontWeight: "bold",
+                        color: "#fff"
                     }}
                 >
                     {title}
@@ -42,14 +43,14 @@ const StatCard = ({
                         >
                             <span
                                 className="text-muted"
-                                style={{ fontSize: "15px" }}
+                                style={{ fontSize: "15px", color: "#fff" }}
                             >
                                 {item.category}
                             </span>
 
                             <span
                                 className="fw-bold"
-                                style={{ fontSize: "15px" }}
+                                style={{ fontSize: "15px", color: "#fff" }}
                             >
                                 {item.count}
                             </span>

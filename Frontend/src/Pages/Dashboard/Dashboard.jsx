@@ -160,25 +160,25 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
           <StatCard
             title="Today"
-            gradient="linear-gradient(135deg, #F1F2FA 0%, #E2E4F4 100%)"
+            gradient="linear-gradient(135deg, #939ada 0%, #6872b1 100%)"
             categories={dayCount}
           />
 
           <StatCard
             title="Week"
-            gradient="linear-gradient(135deg, #FFF8E8 0%, #FFECC7 100%)"
+            gradient="linear-gradient(135deg, #f8c25e 0%, #f79c09 100%)"
             categories={weekCount}
           />
 
           <StatCard
             title="Month"
-            gradient="linear-gradient(135deg, #FFF0F1 0%, #FFE1E4 100%)"
+            gradient="linear-gradient(135deg, #f07e87 0%, #e4404e 100%)"
             categories={monthCount}
           />
 
           <StatCard
             title="Year"
-            gradient="linear-gradient(135deg, #E9FFF2 0%, #D5F9E4 100%)"
+            gradient="linear-gradient(135deg, #48e38e 0%, #14bd63 100%)"
             categories={yearCount}
           />
         </div>
