@@ -3,10 +3,10 @@ const { getConnection } = require("../../../src/config/database");
 const CryptoJS = require("crypto-js");
 const jwt = require("jsonwebtoken"); // Import JWT
 const encrypt = require("../../middleware/authMiddleware");
-const axios = require('axios');
-const fs = require('fs');
-const path = require('path');
-const logDir = path.join(__dirname, '../../../logs');
+const axios = require("axios");
+const fs = require("fs");
+const path = require("path");
+const logDir = path.join(__dirname, "../../../logs");
 const jwksRsa = require("jwks-rsa");
 const { expressjwt: jwtMiddleware } = require("express-jwt");
 
@@ -15,7 +15,8 @@ const {
   AUTH0_DOMAIN,
   AUTH0_CLIENT_ID,
   AUTH0_CLIENT_SECRET,
-  AUTH0_AUDIENCE, AUTH0_REALM
+  AUTH0_AUDIENCE,
+  AUTH0_REALM,
 } = process.env;
 // const getAuth0Token = async (username, password) => {
 //   try {
@@ -170,7 +171,7 @@ const login = async (req, res) => {
         :OUT_RECEIPTOFFICENAME, :OUT_CHALANOFFICENAME, :OUT_PRABHAGNAME, :OUT_PRABHAGID, :OUT_DESIGID, :OUT_USERTYPE,
         :OUT_COLLECTIONCENTER, :OUT_MOBILENO, :OUT_OTPVALIDATE, :OUT_ERRORCODE, :OUT_ERRORMSG, :OUT_ORGID, :OUT_FORCEFULLPASSCHAGE
       ); END;`,
-      bindParams
+      bindParams,
     );
 
     await connection.close();
@@ -194,8 +195,8 @@ const login = async (req, res) => {
       receiptOfficeName: result.outBinds.OUT_RECEIPTOFFICENAME,
       chalanOfficeName: result.outBinds.OUT_CHALANOFFICENAME,
       prabhagName: result.outBinds.OUT_PRABHAGNAME,
-      prabhagID: wardID,//result.outBinds.OUT_PRABHAGID,
-      acccounttype: 1261,
+      prabhagID: wardID, //result.outBinds.OUT_PRABHAGID,
+      acccounttype: 38,
       userType: result.outBinds.OUT_USERTYPE,
       Out_Collectioncenter: result.outBinds.OUT_COLLECTIONCENTER, // Assign Ward ID to Collection Center
       mobileNo: result.outBinds.OUT_MOBILENO,
@@ -221,7 +222,7 @@ const login = async (req, res) => {
       userId: userData.userId,
       prabhagName: userData.prabhagName,
       callcenterId: userData.Out_Collectioncenter,
-      desigId:userData.desigId // Ensure callcenterId is stored
+      desigId: userData.desigId, // Ensure callcenterId is stored
     };
 
     // Generate JWT Token
@@ -254,7 +255,7 @@ const login = async (req, res) => {
     //       console.log("✅ Token written to file:", logPath);
     //     }
     //   });
-        const token = jwt.sign(
+    const token = jwt.sign(
       {
         userId: userData.userId,
         userName: userData.Out_UserName,
@@ -262,16 +263,16 @@ const login = async (req, res) => {
         orgId: userData.out_OrgId,
       },
       JWT_SECRET,
-      { expiresIn: "1h" } // Token expires in 1 hour
+      { expiresIn: "1h" }, // Token expires in 1 hour
     );
-      return res.status(200).json({
-        // token: auth0Token.access_token,
-        // idToken: auth0Token.id_token,
-        // expiresIn: auth0Token.expires_in,
-        token,
-        user: userData,
-        localStorageData
-      });
+    return res.status(200).json({
+      // token: auth0Token.access_token,
+      // idToken: auth0Token.id_token,
+      // expiresIn: auth0Token.expires_in,
+      token,
+      user: userData,
+      localStorageData,
+    });
   } catch (err) {
     console.error("Server Error:", err);
     res.status(500).json({ message: "Server error", error: err.message });
@@ -281,7 +282,8 @@ const login = async (req, res) => {
 const authLogin = async (req, res) => {
   const { username, password } = req.body;
 
-  if (!username || !password) return res.status(400).json({ error: "Username and password required" });
+  if (!username || !password)
+    return res.status(400).json({ error: "Username and password required" });
 
   try {
     const response = await axios.post(`https://${AUTH0_DOMAIN}/oauth/token`, {
@@ -292,7 +294,7 @@ const authLogin = async (req, res) => {
       client_id: AUTH0_CLIENT_ID,
       client_secret: AUTH0_CLIENT_SECRET,
       audience: AUTH0_AUDIENCE,
-      scope: "openid profile email offline_access"
+      scope: "openid profile email offline_access",
     });
 
     const { access_token, refresh_token } = response.data;
@@ -308,7 +310,7 @@ const authLogin = async (req, res) => {
       IN_IPADDR: "192.168.1.100",
       IN_HOSTNAME: "localhost",
       IN_SOURCE: "WEB",
-      IN_DEPTID: "",
+      IN_DEPTID: "38",
 
       OUT_USERNAME: {
         dir: oracledb.BIND_OUT,
@@ -403,7 +405,7 @@ const authLogin = async (req, res) => {
         :OUT_RECEIPTOFFICENAME, :OUT_CHALANOFFICENAME, :OUT_PRABHAGNAME, :OUT_PRABHAGID, :OUT_DESIGID, :OUT_USERTYPE,
         :OUT_COLLECTIONCENTER, :OUT_MOBILENO, :OUT_OTPVALIDATE, :OUT_ERRORCODE, :OUT_ERRORMSG, :OUT_ORGID, :OUT_FORCEFULLPASSCHAGE
       ); END;`,
-      bindParams
+      bindParams,
     );
 
     await connection.close();
@@ -427,8 +429,8 @@ const authLogin = async (req, res) => {
       receiptOfficeName: result.outBinds.OUT_RECEIPTOFFICENAME,
       chalanOfficeName: result.outBinds.OUT_CHALANOFFICENAME,
       prabhagName: result.outBinds.OUT_PRABHAGNAME,
-      prabhagID: wardID,//result.outBinds.OUT_PRABHAGID,
-      acccounttype: 1261,
+      prabhagID: wardID, //result.outBinds.OUT_PRABHAGID,
+      acccounttype: 38,
       userType: result.outBinds.OUT_USERTYPE,
       Out_Collectioncenter: result.outBinds.OUT_COLLECTIONCENTER, // Assign Ward ID to Collection Center
       mobileNo: result.outBinds.OUT_MOBILENO,
@@ -462,7 +464,7 @@ const authLogin = async (req, res) => {
       secure: true,
       sameSite: "None",
       domain: ".nagarkaryavalinew.com",
-      maxAge: 15 * 60 * 1000
+      maxAge: 15 * 60 * 1000,
     });
 
     res.cookie("refresh_token", refresh_token, {
@@ -470,9 +472,9 @@ const authLogin = async (req, res) => {
       secure: true,
       sameSite: "None",
       domain: ".nagarkaryavalinew.com",
-      maxAge: 30 * 24 * 60 * 60 * 1000
+      maxAge: 30 * 24 * 60 * 60 * 1000,
     });
- const token = jwt.sign(
+    const token = jwt.sign(
       {
         userId: userData.userId,
         userName: userData.Out_UserName,
@@ -480,22 +482,20 @@ const authLogin = async (req, res) => {
         orgId: userData.out_OrgId,
       },
       JWT_SECRET,
-      { expiresIn: "1h" } // Token expires in 1 hour
+      { expiresIn: "1h" }, // Token expires in 1 hour
     );
-      return res.status(200).json({
+    return res.status(200).json({
       message: "Logged in successfully",
-        token,
-        user: userData,
-        localStorageData
-      });
-   
+      token,
+      user: userData,
+      localStorageData,
+    });
   } catch (err) {
     console.error("Auth0 login error:", err.response?.data || err.message);
     res.status(401).json({
-  error: "Login failed",
-  details: err.response?.data || err.message || err
-});
-
+      error: "Login failed",
+      details: err.response?.data || err.message || err,
+    });
   }
 };
 
@@ -505,12 +505,12 @@ const checkJwt = jwtMiddleware({
     jwksUri: `https://${AUTH0_DOMAIN}/.well-known/jwks.json`,
     cache: true,
     rateLimit: true,
-    jwksRequestsPerMinute: 5
+    jwksRequestsPerMinute: 5,
   }),
   audience: AUTH0_AUDIENCE,
   issuer: `https://${AUTH0_DOMAIN}/`,
   algorithms: ["RS256"],
-  getToken: req => req.cookies.access_token
+  getToken: (req) => req.cookies.access_token,
 });
 
 // ✅ GET /api/me — return decoded Auth0 user info
@@ -521,14 +521,15 @@ const getMe = (req, res) => {
 // 🔁 POST /api/refresh — refresh access_token using refresh_token
 const refreshToken = async (req, res) => {
   const refresh_token = req.cookies.refresh_token;
-  if (!refresh_token) return res.status(401).json({ error: "No refresh token" });
+  if (!refresh_token)
+    return res.status(401).json({ error: "No refresh token" });
 
   try {
     const response = await axios.post(`https://${AUTH0_DOMAIN}/oauth/token`, {
       grant_type: "refresh_token",
       client_id: AUTH0_CLIENT_ID,
       client_secret: AUTH0_CLIENT_SECRET,
-      refresh_token
+      refresh_token,
     });
 
     res.cookie("access_token", response.data.access_token, {
@@ -536,7 +537,7 @@ const refreshToken = async (req, res) => {
       secure: true,
       sameSite: "None",
       domain: ".nagarkaryavalinew.com",
-      maxAge: 15 * 60 * 1000
+      maxAge: 15 * 60 * 1000,
     });
 
     res.json({ message: "Access token refreshed" });
@@ -553,4 +554,12 @@ const logout = (req, res) => {
   res.status(200).json({ message: "Logged out" });
 };
 
-module.exports = { login, getWardID, authLogin, checkJwt, getMe, refreshToken, logout };
+module.exports = {
+  login,
+  getWardID,
+  authLogin,
+  checkJwt,
+  getMe,
+  refreshToken,
+  logout,
+};
