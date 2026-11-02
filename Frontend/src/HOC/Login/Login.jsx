@@ -11,17 +11,19 @@ import { useLoader } from "../../Context/LoaderContext";
 
 const Login = () => {
   const [isCaptchaValid, setIsCaptchaValid] = useState(false);
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
   const [error, setError] = useState(null);
   const [captchaKey, setCaptchaKey] = useState(0);
-  const { setLoading } = useLoader();
+  // const { setLoading } = useLoader();
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
   const [realPassword, setRealPassword] = useState("");
   const [displayPassword, setDisplayPassword] = useState("");
   const [formData, setFormData] = useState({
     in_UserId: "",
     in_password: "",
   });
-  const { login } = useAuth();
+  const { loginAdmin } = useAuth();
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -41,10 +43,93 @@ const Login = () => {
   const handleFocus = () => {
     setDisplayPassword(realPassword);
   };
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
+  //   setError(null);
+  //   setLoading(true);
+  //   if (!formData.in_UserId || !formData.in_password) {
+  //     setError("Username and password are required.");
+  //     return;
+  //   }
+
+  //   if (!isCaptchaValid) {
+  //     setError("Invalid Captcha. Please try again.");
+  //     return;
+  //   }
+
+  //   try {
+  //     const res = await apiService.post(`login`, formData);
+  //     console.log("Form Data:", formData);
+  //     console.log("API Response:", res);
+
+  //     // ❌ First check if login failed
+  //     if (
+  //       !res.data ||
+  //       (res.data?.result?.out_ErrorCode !== 0 && !res.data.token)
+  //     ) {
+  //       setError(res.data?.message || "Invalid username or password.");
+  //       setCaptchaKey((prev) => prev + 1); // 🔄 refresh captcha
+  //       setIsCaptchaValid(false);
+  //       return; // stop execution here
+  //     }
+
+  //     // ✅ Only destructure when login succeeded
+  //     const { token, user, userConfig } = res.data;
+  //     console.log("Login Successful! Proceeding...");
+
+  //     localStorage.setItem("token", token);
+  //     localStorage.setItem("user", JSON.stringify(user));
+  //     localStorage.setItem("userConfig", JSON.stringify(userConfig));
+  //     login(user, token, userConfig);
+
+  //     if (user.otpValidate === "Y") {
+  //       console.log("OTP Validated. Redirecting to Dashboard...");
+  //       localStorage.setItem("user", JSON.stringify(user));
+  //       window.location.href = "/dashboard";
+  //     } else {
+  //       window.location.href = "/dashboard";
+  //       // navigate();
+  //     }
+  //   } catch (err) {
+  //     console.error("Login API Error:", err);
+
+  //     // Correctly read backend error message
+  //     const backendMessage = err?.response?.data?.message;
+  //     const fallbackMessage = err?.message?.includes("salt")
+  //       ? "Invalid username or password."
+  //       : backendMessage || err.message || "An error occurred";
+
+  //     setError(fallbackMessage);
+  //     setCaptchaKey((prev) => prev + 1); // 🔄 refresh captcha
+  //     setIsCaptchaValid(false);
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  const loginUser = async (userid, password) => {
+    const res = await apiService.post("login", {
+      in_UserId: userid,
+      in_password: password,
+    });
+
+    if (!res?.data || typeof res.data !== "object") {
+      throw new Error("Invalid response");
+    }
+
+    if (res.data?.result?.out_ErrorCode === 0 || res.data.token) {
+      return res.data;
+    } else {
+      throw new Error(
+        res.data?.result?.Out_ErrorMsg || "Invalid username or password.",
+      );
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
-    setLoading(true);
+
     if (!formData.in_UserId || !formData.in_password) {
       setError("Username and password are required.");
       return;
@@ -56,54 +141,95 @@ const Login = () => {
     }
 
     try {
-      const res = await apiService.post(`login`, formData);
-      console.log("Form Data:", formData);
-      console.log("API Response:", res);
+      const data = await loginUser(formData.in_UserId, formData.in_password);
 
-      // ❌ First check if login failed
-      if (
-        !res.data ||
-        (res.data?.result?.out_ErrorCode !== 0 && !res.data.token)
-      ) {
-        setError(res.data?.message || "Invalid username or password.");
-        setCaptchaKey((prev) => prev + 1); // 🔄 refresh captcha
-        setIsCaptchaValid(false);
-        return; // stop execution here
-      }
-
-      // ✅ Only destructure when login succeeded
-      const { token, user, userConfig } = res.data;
-      console.log("Login Successful! Proceeding...");
+      const { token, user } = data;
 
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(user));
-      localStorage.setItem("userConfig", JSON.stringify(userConfig));
-      login(user, token, userConfig);
+      loginAdmin(data.user, data.token);
 
       if (user.otpValidate === "Y") {
-        console.log("OTP Validated. Redirecting to Dashboard...");
-        localStorage.setItem("user", JSON.stringify(user));
-        window.location.href = "/dashboard";
+        navigate("/otp-verification", {
+          state: {
+            userId: user.userId,
+            mobile: user.mobileNo,
+            ulbId: user.out_OrgId,
+            maskedMobile: user.mobileNo?.replace(
+              /^(\d{2})\d{6}(\d{2})$/,
+              "$1******$2",
+            ),
+          },
+        });
       } else {
-        window.location.href = "/dashboard";
-        // navigate();
+        navigate("/dashboard");
       }
     } catch (err) {
-      console.error("Login API Error:", err);
+      setError(err.message);
+    }
+  };
 
-      // Correctly read backend error message
-      const backendMessage = err?.response?.data?.message;
-      const fallbackMessage = err?.message?.includes("salt")
-        ? "Invalid username or password."
-        : backendMessage || err.message || "An error occurred";
-
-      setError(fallbackMessage);
-      setCaptchaKey((prev) => prev + 1); // 🔄 refresh captcha
-      setIsCaptchaValid(false);
+  const handleSilentSubmit = async (userid, password) => {
+    try {
+      setLoading(true);
+      const data = await loginUser(userid, password);
+      const { token, user } = data;
+      const loggedInUser = data.user;
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(loggedInUser));
+      loginAdmin(loggedInUser, data.token);
+      // if (user.otpValidate === "Y") {
+      //     navigate("/otp-verification");
+      //   } else {
+      navigate("/dashboard");
+      // }
+    } catch (err) {
+      setError(err.message || "Silent login failed.");
     } finally {
       setLoading(false);
     }
   };
+
+  const validateTokenAndLogin = async () => {
+    try {
+      const response = await axios.post(
+        `${API_BASE_URL}/validate-token`,
+        {},
+        { withCredentials: true },
+      );
+      const outBinds = response.data?.outBinds;
+      console.log("🔥 validate response", outBinds);
+
+      if (outBinds?.out_ErrorCode === 9999) {
+        console.log("✅ Valid token, logging in silently...");
+        await handleSilentSubmit(outBinds.out_userid, outBinds.out_encpassword);
+        return true;
+      } else {
+        console.log("❌ Invalid token, redirect needed");
+        return false;
+      }
+    } catch (err) {
+      console.error("❌ API call failed:", err);
+      return false;
+    }
+  };
+
+  // useEffect(() => {
+  //   const token = localStorage.getItem("token");
+  //   if (token) {
+  //     validateTokenAndLogin();
+  //   }
+  // }, []);
+
+  useEffect(() => {
+    const checkSession = async () => {
+      const ok = await validateTokenAndLogin();
+      if (!ok) {
+        window.location.href = "https://nagarkaryavalinewuat.com/";
+      }
+    };
+    checkSession();
+  }, []);
 
   return (
     <div className="bg-gray-100 min-h-screen flex items-center justify-center p-4">
