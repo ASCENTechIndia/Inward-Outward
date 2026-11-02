@@ -1,6 +1,15 @@
-const express = require('express');
-const { login, authLogin,  checkJwt, getMe, refreshToken, logout } = require('../../../src/controllers/Admin/authController');
-const { getWardID } = require('../../../src/controllers/Admin/authController');
+const express = require("express");
+const {
+  login,
+  authLogin,
+  checkJwt,
+  getMe,
+  refreshToken,
+  logout,
+  getCurrentUser,
+} = require("../../../src/controllers/Admin/authController");
+const { getWardID } = require("../../../src/controllers/Admin/authController");
+const isValidToken = require("../../../src/controllers/Admin/isValidToken");
 
 const router = express.Router();
 
@@ -26,13 +35,11 @@ router.get("/ward/:zoneID", async (req, res) => {
   }
 });
 
-// const express = require('express');
-const  isValidToken  = require('../../../src/controllers/Admin/isValidToken');
-
-router.post('/validate-token', isValidToken);
+router.post("/validate-token", isValidToken);
 router.post("/api/login", authLogin);
 router.get("/api/me", checkJwt, getMe);
 router.post("/api/refresh", refreshToken);
 router.post("/api/logout", logout);
+router.post("/me", getCurrentUser);
 
 module.exports = router;

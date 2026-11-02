@@ -23,7 +23,7 @@ const Login = () => {
     in_UserId: "",
     in_password: "",
   });
-  const { loginAdmin } = useAuth();
+  const { loginAdmin, login } = useAuth();
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData({ ...formData, [name]: value });
@@ -108,22 +108,28 @@ const Login = () => {
   // };
 
   const loginUser = async (userid, password) => {
-    const res = await apiService.post("login", {
-      in_UserId: userid,
-      in_password: password,
-    });
+    const res = await axios.post(
+      `${API_BASE_URL}/login`,
+      {
+        in_UserId: userid,
+        in_password: password,
+      },
+      {
+        withCredentials: true,
+      },
+    );
 
     if (!res?.data || typeof res.data !== "object") {
       throw new Error("Invalid response");
     }
 
-    if (res.data?.result?.out_ErrorCode === 0 || res.data.token) {
+    if (res.data?.user?.errorCode === 9999) {
       return res.data;
-    } else {
-      throw new Error(
-        res.data?.result?.Out_ErrorMsg || "Invalid username or password.",
-      );
     }
+
+    throw new Error(
+      res.data?.user?.errorMsg || "Invalid username or password.",
+    );
   };
 
   const handleSubmit = async (e) => {
@@ -173,16 +179,18 @@ const Login = () => {
     try {
       setLoading(true);
       const data = await loginUser(userid, password);
-      const { token, user } = data;
+      const { token } = data;
       const loggedInUser = data.user;
+
       localStorage.setItem("token", token);
       localStorage.setItem("user", JSON.stringify(loggedInUser));
       loginAdmin(loggedInUser, data.token);
-      // if (user.otpValidate === "Y") {
-      //     navigate("/otp-verification");
-      //   } else {
+
+      sessionStorage.setItem("inwardSession", "true");
+      localStorage.setItem("inwardSession", "true");
+
+      window.history.replaceState({}, document.title, window.location.pathname);
       navigate("/dashboard");
-      // }
     } catch (err) {
       setError(err.message || "Silent login failed.");
     } finally {
@@ -232,85 +240,97 @@ const Login = () => {
   }, []);
 
   return (
-    <div className="bg-gray-100 min-h-screen flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-lg shadow-xl overflow-hidden">
-          {/* Header */}
-          <div className="bg-blue-600 py-6 px-8 text-center">
-            <h1 className="text-2xl font-bold text-white">Inward Outward</h1>
-          </div>
-
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} className="p-8 space-y-6">
-            {/* Email Input */}
-            <div className="space-y-2">
-              <label
-                htmlFor="username"
-                className="block text-sm font-medium text-gray-700"
-              >
-                User Name
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaUser className="text-gray-400" />
-                </div>
-                <input
-                  type="text"
-                  id="in_UserId"
-                  name="in_UserId"
-                  placeholder="User Name"
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  value={formData.in_UserId}
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-            </div>
-
-            {/* Password Input */}
-            <div className="space-y-2">
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Password
-              </label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <FaLock className="text-gray-400" />
-                </div>
-                <input
-                  type="password"
-                  id="in_password"
-                  name="in_password"
-                  placeholder="Enter Password"
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                  required
-                  value={displayPassword}
-                  onChange={handleChange}
-                  onBlur={handleBlur}
-                  onFocus={handleFocus}
-                />
-              </div>
-            </div>
-
-            {/* Simplified Captcha Component */}
-            <Captcha
-              key={captchaKey}
-              onValidate={(isValid) => setIsCaptchaValid(isValid)}
-            />
-            {error && <div className="error-message text-danger">{error}</div>}
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-            >
-              Login
-            </Button>
-          </form>
+    <>
+      {loading ? (
+        <div className="fixed inset-0 flex items-center justify-center bg-white bg-opacity-80 z-50">
+          <div className="animate-spin h-16 w-16 rounded-full border-4 border-blue-500 border-t-transparent"></div>
         </div>
-      </div>
-    </div>
+      ) : (
+        <div className="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+          <div className="w-full max-w-md">
+            <div className="bg-white rounded-lg shadow-xl overflow-hidden">
+              {/* Header */}
+              <div className="bg-blue-600 py-6 px-8 text-center">
+                <h1 className="text-2xl font-bold text-white">
+                  Inward Outward
+                </h1>
+              </div>
+
+              {/* Login Form */}
+              <form onSubmit={handleSubmit} className="p-8 space-y-6">
+                {/* Email Input */}
+                <div className="space-y-2">
+                  <label
+                    htmlFor="username"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    User Name
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FaUser className="text-gray-400" />
+                    </div>
+                    <input
+                      type="text"
+                      id="in_UserId"
+                      name="in_UserId"
+                      placeholder="User Name"
+                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      value={formData.in_UserId}
+                      onChange={handleChange}
+                      required
+                    />
+                  </div>
+                </div>
+
+                {/* Password Input */}
+                <div className="space-y-2">
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Password
+                  </label>
+                  <div className="relative">
+                    <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                      <FaLock className="text-gray-400" />
+                    </div>
+                    <input
+                      type="password"
+                      id="in_password"
+                      name="in_password"
+                      placeholder="Enter Password"
+                      className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                      required
+                      value={displayPassword}
+                      onChange={handleChange}
+                      onBlur={handleBlur}
+                      onFocus={handleFocus}
+                    />
+                  </div>
+                </div>
+
+                {/* Simplified Captcha Component */}
+                <Captcha
+                  key={captchaKey}
+                  onValidate={(isValid) => setIsCaptchaValid(isValid)}
+                />
+                {error && (
+                  <div className="error-message text-danger">{error}</div>
+                )}
+                {/* Submit Button */}
+                <Button
+                  type="submit"
+                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                >
+                  Login
+                </Button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

@@ -225,36 +225,6 @@ const login = async (req, res) => {
       desigId: userData.desigId, // Ensure callcenterId is stored
     };
 
-    // Generate JWT Token
-    //  const auth0Token = await getAuth0Token(in_UserId, in_password);
-
-    //   if (!auth0Token) {
-    //     return res.status(500).json({ message: "Oracle login succeeded, but Auth0 SSO token failed" });
-    //   }
-
-    //   console.log("✅ Auth0 Access Token:", auth0Token.access_token);
-    //             if (!fs.existsSync(logDir)) {
-    //         fs.mkdirSync(logDir, { recursive: true });
-    //       }
-
-    //   const logPath = path.join(logDir, 'auth0_tokens.log');
-
-    //   const logContent = `
-    //   [${new Date().toISOString()}]
-    //   User: ${in_UserId}
-    //   Access Token: ${auth0Token.access_token}
-    //   ID Token: ${auth0Token.id_token}
-    //   Expires In: ${auth0Token.expires_in} seconds
-    //   -----------------------------------------------------
-    //   `;
-
-    //   fs.appendFile(logPath, logContent, (err) => {
-    //     if (err) {
-    //       console.error("❌ Failed to write token log:", err);
-    //     } else {
-    //       console.log("✅ Token written to file:", logPath);
-    //     }
-    //   });
     const token = jwt.sign(
       {
         userId: userData.userId,
@@ -265,10 +235,18 @@ const login = async (req, res) => {
       JWT_SECRET,
       { expiresIn: "1h" }, // Token expires in 1 hour
     );
+    const cookieOptions = {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      path: "/",
+      domain: ".nagarkaryavalinewuat.com",
+      maxAge: 60 * 60 * 1000, // 1 hour, match token expiry
+    };
+
+    res.cookie("inward_token", token, cookieOptions);
+    res.cookie("access_token", token, cookieOptions);
     return res.status(200).json({
-      // token: auth0Token.access_token,
-      // idToken: auth0Token.id_token,
-      // expiresIn: auth0Token.expires_in,
       token,
       user: userData,
       localStorageData,
@@ -463,7 +441,7 @@ const authLogin = async (req, res) => {
       httpOnly: true,
       secure: true,
       sameSite: "None",
-      domain: ".nagarkaryavalinew.com",
+      domain: ".nagarkaryavalinewuat.com",
       maxAge: 15 * 60 * 1000,
     });
 
@@ -471,7 +449,7 @@ const authLogin = async (req, res) => {
       httpOnly: true,
       secure: true,
       sameSite: "None",
-      domain: ".nagarkaryavalinew.com",
+      domain: ".nagarkaryavalinewuat.com",
       maxAge: 30 * 24 * 60 * 60 * 1000,
     });
     const token = jwt.sign(
@@ -554,6 +532,19 @@ const logout = (req, res) => {
   res.status(200).json({ message: "Logged out" });
 };
 
+const getCurrentUser = async (req, res) => {
+  try {
+    const token = req.cookies?.inward_token;
+    if (!token) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    const decoded = jwt.verify(token, JWT_SECRET);
+    return res.status(200).json({ user: decoded });
+  } catch (error) {
+    return res.status(401).json({ message: "Session expired" });
+  }
+};
+
 module.exports = {
   login,
   getWardID,
@@ -562,4 +553,5 @@ module.exports = {
   getMe,
   refreshToken,
   logout,
+  getCurrentUser,
 };

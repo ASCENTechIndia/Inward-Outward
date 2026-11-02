@@ -1,25 +1,33 @@
 import { Navigate } from "react-router-dom";
-import { jwtDecode } from "jwt-decode";
+import { useAuth } from "../Context/AuthContext";
 
 const ProtectedRoute = ({ children }) => {
-  const token = localStorage.getItem("token");
+  const { user, loading } = useAuth();
 
-  if (!token) {
+  if (loading) {
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <div>Loading...</div>
+      </div>
+    );
+  }
+
+  const inwardSession =
+    sessionStorage.getItem("inwardSession") ||
+    localStorage.getItem("inwardSession");
+
+  if (!user && !inwardSession) {
     return <Navigate to="/" replace />;
   }
 
-  try {
-    const decoded = jwtDecode(token);
-    const isExpired = decoded.exp * 1000 < Date.now();
-
-    if (isExpired) {
-      return <Navigate to="/" replace />;
-    }
-
-    return children;
-  } catch (err) {
-    return <Navigate to="/" replace />;
-  }
+  return children;
 };
 
 export default ProtectedRoute;
