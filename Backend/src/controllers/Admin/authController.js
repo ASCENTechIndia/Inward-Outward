@@ -545,6 +545,41 @@ const getCurrentUser = async (req, res) => {
   }
 };
 
+const getDesignationName = async (req, res) => {
+  const { ulbId, desigId } = req.body;
+  if (!ulbId || !desigId) {
+    return res.json({
+      success: false,
+      errorMessage: "UlbId and DesignationId is required",
+    });
+  }
+  let connection;
+  try {
+    connection = await getConnection();
+    const query = `select * from prop.vw_desigconfig where ulbid = :ulbId and desig_id = :desigId`;
+
+    const bind = { desigId: Number(desigId), ulbId: Number(ulbId) };
+    const result = await connection.execute(query, bind, {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+    });
+    res.json({
+      success: true,
+      data: result.rows || [],
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error("Error closing DB connection:", err);
+      }
+    }
+  }
+};
+
 module.exports = {
   login,
   getWardID,
@@ -554,4 +589,5 @@ module.exports = {
   refreshToken,
   logout,
   getCurrentUser,
+  getDesignationName,
 };

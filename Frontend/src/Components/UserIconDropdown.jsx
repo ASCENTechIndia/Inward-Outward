@@ -4,12 +4,14 @@ import { useAuth } from "../Context/AuthContext";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-const UserIconDropdown = ({ name = "",imageUrl = "" }) => {
+const UserIconDropdown = ({ name = "", imageUrl = "", desigName = "" }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, setUser, logout } = useAuth();
 
   const userId = user?.userId;
   const ulbId = user?.ulbId;
+  const deptName = user?.prabhagName;
+
   const toggleDropdown = () => setIsOpen(!isOpen);
 
   const handleLogout = async () => {
@@ -91,6 +93,8 @@ const UserIconDropdown = ({ name = "",imageUrl = "" }) => {
             <div>
               <div className="font-semibold text-sm">{userId}</div>
               <div className="text-xs text-gray-500">{name}</div>
+              <div className="text-xs text-gray-500">{deptName}</div>
+              <div className="text-xs text-gray-500">{desigName}</div>
             </div>
           </div>
 

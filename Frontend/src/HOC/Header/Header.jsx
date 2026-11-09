@@ -10,35 +10,62 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 const Header = ({ toggleSidebar: parentToggleSidebar }) => {
   const { user } = useAuth();
   const ulbId = user?.ulbId;
+  const desigId = user?.desigId;
   const userName = user?.username;
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [desigName, setDesigName] = useState("");
   const [corpName, setCorpName] = useState("");
   const [corpEName, setCorpEName] = useState("");
   const [logo, setLogo] = useState(null);
 
   // Fetch corporation details
-  useEffect(() => {
-    const fetchCorpDetails = async () => {
-      if (!ulbId) return;
-      try {
-        const res = await fetch(`${API_BASE_URL}/textLogo`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ ulbId }),
-        });
-        const data = await res.json();
-        if (data.success) {
-          setCorpName(data.data.ABC_MUNICIPAL_TEXT);
-          setCorpEName(data.data.ABC_MUNICIPAL_ETEXT);
-          setLogo(data.data.ULBLOGO);
-        }
-      } catch (err) {
-        console.error("Error fetching corporation details:", err);
+  const fetchCorpDetails = async () => {
+    if (!ulbId) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/textLogo`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ulbId }),
+      });
+      const data = await res.json();
+      if (data.success) {
+        setCorpName(data.data.ABC_MUNICIPAL_TEXT);
+        setCorpEName(data.data.ABC_MUNICIPAL_ETEXT);
+        setLogo(data.data.ULBLOGO);
       }
-    };
+    } catch (err) {
+      console.error("Error fetching corporation details:", err);
+    }
+  };
+  const fetchDesignationName = async () => {
+    if (!ulbId || !desigId) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/getDesignationName`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ulbId, desigId }),
+      });
+      const data = await res.json();
+      if (data?.success && data?.data?.length > 0) {
+        setDesigName(data.data[0].DESIG_ENAME);
+      } else {
+        setDesigName("");
+      }
+    } catch (err) {
+      setDesigName("");
+      console.error("Error fetching designation details:", err);
+    }
+  };
+  useEffect(() => {
     fetchCorpDetails();
   }, [ulbId]);
+
+  useEffect(() => {
+    if (ulbId && desigId) {
+      fetchDesignationName();
+    }
+  }, [ulbId, desigId]);
 
   const toggleSidebar = () => {
     setIsSidebarOpen((prev) => !prev);
@@ -95,7 +122,7 @@ const Header = ({ toggleSidebar: parentToggleSidebar }) => {
 
       {/* ---------- Right: User dropdown ---------- */}
       <div className="flex items-center gap-2 flex-shrink-0">
-        <UserIconDropdown name={userName} className="w-9 h-9 md:w-10 md:h-10" />
+        <UserIconDropdown desigName={desigName} name={userName} className="w-9 h-9 md:w-10 md:h-10" />
       </div>
     </header>
   );

@@ -133,8 +133,13 @@ const STATIC_MENU = [
     children: [
       {
         MENUID: 401,
-        MENUTITLE: "Outward Form",
+        MENUTITLE: "जावक नोंद",
         PAGEPATH: "/Outward/FrmOutward",
+      },
+      {
+        MENUID: 402,
+        MENUTITLE: "थेट जावक नोंद",
+        PAGEPATH: "/Outward/FrmDirectOutwardEntry",
       },
     ],
   },

@@ -683,7 +683,7 @@ const FrmInvardMst = () => {
             <input
               type="text"
               placeholder="Enter inward number"
-              className="form-input-box"
+              className="form-input-box bg-slate-100 text-slate-500 cursor-not-allowed"
               {...register("invardNo")}
               disabled={true}
             />
@@ -692,7 +692,7 @@ const FrmInvardMst = () => {
             <Label text="दिनांक : " />
             <input
               type="date"
-              className={`form-input-box ${errors.date ? "border-red-500" : ""}`}
+              className={`form-input-box ${errors.date ? "border-red-500" : ""} bg-slate-100 text-slate-500 cursor-not-allowed`}
               {...register("date", { required: "दिनांक आवश्यक आहे" })}
               disabled={true}
             />
@@ -728,7 +728,7 @@ const FrmInvardMst = () => {
                       focus:outline-none focus:ring-2 focus:ring-blue-500/40
                       ${
                         !watchSender
-                          ? "bg-slate-100 text-slate-500 cursor-not-allowed pointer-events-none"
+                          ? "bg-slate-100 text-slate-500 cursor-not-allowed"
                           : ""
                       }
                       ${errors.subtype ? "border-red-500" : ""}`}
@@ -1043,7 +1043,7 @@ const FrmInvardMst = () => {
                       <select
                         disabled
                         className="form-input-box w-full border border-gray-300 rounded-md px-2 py-1.5 text-sm
-                                        bg-slate-100 text-slate-500 cursor-not-allowed pointer-events-none"
+                                        bg-slate-100 text-slate-500 cursor-not-allowed"
                         {...register(`tableRow.purpose`)}
                       >
                         <option value="">-- Select --</option>
