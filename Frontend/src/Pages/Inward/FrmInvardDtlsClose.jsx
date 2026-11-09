@@ -24,10 +24,6 @@ const FrmInvardDtlsClose = () => {
   const { user } = useAuth();
   const userId = user?.userId;
   const ulbid = user?.ulbId;
-  // const mode = searchParams.get("mode");
-  // console.log(mode);
-  // console.log(userId);
-  // console.log(ulbid);
 
   const {
     register,
@@ -91,10 +87,6 @@ const FrmInvardDtlsClose = () => {
           setShowTable(false);
           return;
         }
-        // const navigateToURL = mode === 1 ? "/Inward/FrmInwardClose" : mode === 2 ? "" : "";
-        // const navigateState = mode === 1 ? {
-
-        // }
         const formatted = response.data.data.map((item) => ({
           id: item.INWARDID || "",
           number: item.INWORD_NO || "",
@@ -135,11 +127,11 @@ const FrmInvardDtlsClose = () => {
 
   return (
     <Layout
-      title="Invard List"
+      title="Inward Close"
       breadcrumb={{
         homeLink: "/dashboard",
         homeText: "Home",
-        current: "Invard List",
+        current: "Inward Close",
       }}
     >
       <form onSubmit={handleSubmit(handleSearch)} className="w-full space-y-6">

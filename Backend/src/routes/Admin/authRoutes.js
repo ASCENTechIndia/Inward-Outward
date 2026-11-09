@@ -7,6 +7,7 @@ const {
   refreshToken,
   logout,
   getCurrentUser,
+  getDesignationName,
 } = require("../../../src/controllers/Admin/authController");
 const { getWardID } = require("../../../src/controllers/Admin/authController");
 const isValidToken = require("../../../src/controllers/Admin/isValidToken");
@@ -41,5 +42,6 @@ router.get("/api/me", checkJwt, getMe);
 router.post("/api/refresh", refreshToken);
 router.post("/api/logout", logout);
 router.post("/me", getCurrentUser);
+router.post("/getDesignationName", getDesignationName)
 
 module.exports = router;

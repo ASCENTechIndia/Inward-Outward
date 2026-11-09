@@ -16,8 +16,18 @@ const formatOracleDate = (dateStr) => {
   const d = new Date(dateStr);
   if (isNaN(d.getTime())) return null;
   const months = [
-    "Jan", "Feb", "Mar", "Apr", "May", "Jun",
-    "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
+    "May",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
   ];
   const day = String(d.getDate()).padStart(2, "0");
   return `${day}-${months[d.getMonth()]}-${d.getFullYear()}`;
@@ -32,7 +42,6 @@ const formatDisplayDate = (dateStr) => {
   const month = String(d.getMonth() + 1).padStart(2, "0");
   return `${day}-${month}-${d.getFullYear()}`;
 };
-
 
 const reportHeaders = [
   "अनुक्रमांक.",
@@ -72,7 +81,6 @@ const getToday = () => {
   return `${d.getFullYear()}-${month}-${day}`;
 };
 
-
 const FrmInwardRegRpt = () => {
   const { user } = useAuth();
   const ulbid = user?.ulbId;
@@ -88,9 +96,8 @@ const FrmInwardRegRpt = () => {
   const [docSubTypeOptions, setDocSubTypeOptions] = useState([]);
 
   const [ulbLogo, setUlbLogo] = useState("");
-  const [municipalText, setMunicipalText ] = useState("");
+  const [municipalText, setMunicipalText] = useState("");
 
-  
   const [tableData, setTableData] = useState([]);
 
   const {
@@ -121,7 +128,6 @@ const FrmInwardRegRpt = () => {
   const watchFromDate = watch("fromDate");
   const watchToDate = watch("toDate");
 
-
   useEffect(() => {
     if (watchReportType === "1") {
       setValue("includeDateFilter", true);
@@ -134,7 +140,6 @@ const FrmInwardRegRpt = () => {
   const checkboxChecked = watchReportType === "1" || watchIncludeDate === true;
   const datesDisabled = !(watchReportType === "1" || watchIncludeDate === true);
 
-
   useEffect(() => {
     setValue("deptId", "");
     setValue("empId", "");
@@ -146,7 +151,6 @@ const FrmInwardRegRpt = () => {
     setTableData([]);
   }, [watchReportType, setValue]);
 
-  
   useEffect(() => {
     if (!ulbid || !watchReportType) return;
 
@@ -201,7 +205,6 @@ const FrmInwardRegRpt = () => {
     loadDropdowns();
   }, [watchReportType, ulbid, userDeptId, userDesigId, setLoading]);
 
-
   useEffect(() => {
     if (!watchSender || !ulbid) {
       setSenderSubTypeOptions([]);
@@ -230,20 +233,19 @@ const FrmInwardRegRpt = () => {
       setLoading(true);
 
       const response = await apiService.post("textlogo", {
-        "ulbId": Number(ulbid)
+        ulbId: Number(ulbid),
       });
 
       if (response?.data?.success) {
         setUlbLogo(response?.data?.data?.ULBLOGO);
-        setMunicipalText(response?.data?.data?.ABC_MUNICIPAL_TEXT)
-      } 
+        setMunicipalText(response?.data?.data?.ABC_MUNICIPAL_TEXT);
+      }
     } catch (error) {
       console.error(error);
-    } finally { 
+    } finally {
       setLoading(false);
     }
-  }
-
+  };
 
   const onSubmit = async (data) => {
     if (!ulbid) {
@@ -256,7 +258,6 @@ const FrmInwardRegRpt = () => {
       return;
     }
 
-   
     if (data.reportType === "2" && !data.deptId) {
       alert("कृपया विभाग निवडा");
       return;
@@ -304,9 +305,7 @@ const FrmInwardRegRpt = () => {
         docSubTypeId: data.docSubTypeId ? Number(data.docSubTypeId) : null,
       };
 
-
       const res = await apiService.post("getInwardRegisterReport", payload);
-
 
       if (res?.data?.success && Array.isArray(res.data.data)) {
         if (res.data.data.length === 0) {
@@ -325,7 +324,7 @@ const FrmInwardRegRpt = () => {
           row.DOC_SUBTYPE || "",
           row.REFNO || "",
           formatDisplayDate(row.REFDATE),
-          row.INWARD_FROM || "",
+          row.RECEIVEDFROM || "",
           row.ADDRESS || "",
           row.MOBILE || "",
           row.SUBJECT || "",
@@ -349,7 +348,6 @@ const FrmInwardRegRpt = () => {
     }
   };
 
- 
   const handleReset = () => {
     reset({
       reportType: "",
@@ -372,7 +370,6 @@ const FrmInwardRegRpt = () => {
     setDocSubTypeOptions([]);
   };
 
-
   const dateRangeText =
     watchReportType === "1" && watchFromDate && watchToDate
       ? `${formatDisplayDate(watchFromDate)} ते ${formatDisplayDate(watchToDate)}`
@@ -394,9 +391,7 @@ const FrmInwardRegRpt = () => {
       }}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-4">
-        
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-    
           <div>
             <Label text="निवडक वर्ग : " required />
             <select
@@ -420,6 +415,29 @@ const FrmInwardRegRpt = () => {
             )}
           </div>
 
+          <div>
+            <Label text="दिनांकापासून : " />
+            <input
+              type="date"
+              disabled={datesDisabled}
+              className={`form-input-box ${
+                datesDisabled ? "bg-slate-100 cursor-not-allowed" : ""
+              }`}
+              {...register("fromDate")}
+            />
+          </div>
+
+          <div>
+            <Label text="दिनांकापर्यंत : " />
+            <input
+              type="date"
+              disabled={datesDisabled}
+              className={`form-input-box ${
+                datesDisabled ? "bg-slate-100 cursor-not-allowed" : ""
+              }`}
+              {...register("toDate")}
+            />
+          </div>
 
           {watchReportType === "2" && (
             <div>
@@ -439,7 +457,6 @@ const FrmInwardRegRpt = () => {
             </div>
           )}
 
-
           {watchReportType === "3" && (
             <div>
               <Label text="कर्मचारी : " required />
@@ -457,7 +474,6 @@ const FrmInwardRegRpt = () => {
               </select>
             </div>
           )}
-
 
           {watchReportType === "4" && (
             <>
@@ -498,47 +514,43 @@ const FrmInwardRegRpt = () => {
               </div>
             </>
           )}
-        </div>
 
-
-        {watchReportType === "4" && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div>
-              <Label text="दस्तऐवजचे प्रकार : " />
-              <select
-                className="form-input-box w-full border border-gray-400 rounded-md px-3 py-2 text-sm
+          {watchReportType === "4" && (
+            <>
+              <div>
+                <Label text="दस्तऐवजचे प्रकार : " />
+                <select
+                  className="form-input-box w-full border border-gray-400 rounded-md px-3 py-2 text-sm
                   focus:outline-none focus:ring-2 focus:ring-blue-500/40"
-                {...register("docTypeId")}
-              >
-                <option value="">--निवडा--</option>
-                {docTypeOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </div>
+                  {...register("docTypeId")}
+                >
+                  <option value="">--निवडा--</option>
+                  {docTypeOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
 
-            <div>
-              <Label text="दस्तऐवजचे उपप्रकार : " />
-              <select
-                className="form-input-box w-full border border-gray-400 rounded-md px-3 py-2 text-sm
+              <div>
+                <Label text="दस्तऐवजचे उपप्रकार : " />
+                <select
+                  className="form-input-box w-full border border-gray-400 rounded-md px-3 py-2 text-sm
                   focus:outline-none focus:ring-2 focus:ring-blue-500/40"
-                {...register("docSubTypeId")}
-              >
-                <option value="">--निवडा--</option>
-                {docSubTypeOptions.map((opt) => (
-                  <option key={opt.value} value={opt.value}>
-                    {opt.label}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        )}
+                  {...register("docSubTypeId")}
+                >
+                  <option value="">--निवडा--</option>
+                  {docSubTypeOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </>
+          )}
 
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div className="flex items-end gap-2">
             <label className="flex items-center gap-2 cursor-pointer select-none">
               <input
@@ -555,30 +567,7 @@ const FrmInwardRegRpt = () => {
               </span>
             </label>
           </div>
-
-          <div>
-            <Label text="दिनांकापासून : " />
-            <input
-              type="date"
-              disabled={datesDisabled}
-              className={`form-input-box ${datesDisabled ? "bg-slate-100 cursor-not-allowed" : ""
-                }`}
-              {...register("fromDate")}
-            />
-          </div>
-
-          <div>
-            <Label text="दिनांकापर्यंत : " />
-            <input
-              type="date"
-              disabled={datesDisabled}
-              className={`form-input-box ${datesDisabled ? "bg-slate-100 cursor-not-allowed" : ""
-                }`}
-              {...register("toDate")}
-            />
-          </div>
         </div>
-
 
         <div className="flex justify-center gap-3 pt-2">
           <Button type="submit" disabled={isSubmitting}>
@@ -608,7 +597,7 @@ const FrmInwardRegRpt = () => {
                 fileName={`InwardRegister_${new Date()
                   .toISOString()
                   .slice(0, 10)}.pdf`}
-                ulbName={municipalText|| "Municipal Corporation"}
+                ulbName={municipalText || "Municipal Corporation"}
                 logoUrl={ulbLogo || ""}
                 reportTitle="आवक रजिस्टर"
                 dateRange={dateRangeText}

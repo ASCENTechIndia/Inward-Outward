@@ -377,11 +377,11 @@ const FrmOutward = () => {
 
   return (
     <Layout
-      title="Outward Entry"
+      title="जावक नोंद"
       breadcrumb={{
         homeLink: "/dashboard",
         homeText: "Home",
-        current: "Outward Entry",
+        current: "जावक नोंद",
       }}
     >
       <form onSubmit={handleSubmit(onSubmit)} className="w-full space-y-6">
