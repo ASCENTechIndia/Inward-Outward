@@ -78,6 +78,7 @@ const FrmOutwardRegRpt = () => {
         "विषय",
         "जावक प्रकार",
         "शेरा",
+        "विभाग"
     ]);
 
     const [tableData, setTableData] = useState([]);
@@ -110,7 +111,6 @@ const FrmOutwardRegRpt = () => {
             };
 
             const response = await apiService.post("getOutwardRegReport", payload);
-
             if (response?.data?.success && response?.data?.data.length > 0) {
                 setTableData(response.data.data);
 
@@ -126,7 +126,8 @@ const FrmOutwardRegRpt = () => {
                     item.ADDRESS || "",
                     item.SUBJECT || "",
                     item.OUTWARDMODE_NAME || "",
-                    item.REMARK || ""
+                    item.REMARK || "",
+                    item.DEPTNAME || ""
                 ]));
                 setFormattedData(formatted);
             } else if (response?.data?.success && response.data.data.length === 0) {

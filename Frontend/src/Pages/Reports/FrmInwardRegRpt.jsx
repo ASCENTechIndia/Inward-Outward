@@ -10,6 +10,8 @@ import apiService from "../../../apiService";
 import { useAuth } from "../../Context/AuthContext";
 import { useLoader } from "../../Context/LoaderContext";
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 // Convert ISO date → DD-MMM-YYYY (Oracle format)
 const formatOracleDate = (dateStr) => {
   if (!dateStr) return null;
@@ -86,6 +88,7 @@ const FrmInwardRegRpt = () => {
   const ulbid = user?.ulbId;
   const userDeptId = user?.deptId;
   const userDesigId = user?.desigId;
+  const userId = user?.userId;
   const { setLoading } = useLoader();
 
   const [deptOptions, setDeptOptions] = useState([]);
@@ -94,6 +97,7 @@ const FrmInwardRegRpt = () => {
   const [senderSubTypeOptions, setSenderSubTypeOptions] = useState([]);
   const [docTypeOptions, setDocTypeOptions] = useState([]);
   const [docSubTypeOptions, setDocSubTypeOptions] = useState([]);
+  const [departmentId, setDepartmentId] = useState("");
 
   const [ulbLogo, setUlbLogo] = useState("");
   const [municipalText, setMunicipalText] = useState("");
@@ -166,7 +170,7 @@ const FrmInwardRegRpt = () => {
         } else if (watchReportType === "3") {
           const res = await apiService.post("getEmpDropdown", {
             ulbid: Number(ulbid),
-            deptId: Number(userDeptId),
+            deptId: Number(departmentId),
             desigId: Number(userDesigId),
           });
           setEmpOptions(toOptions(res, "NUM_USER_USERID", "VAR_USER_USERNAME"));
@@ -244,6 +248,26 @@ const FrmInwardRegRpt = () => {
       console.error(error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchDepartmentId = async () => {
+    if (!userId || !ulbid) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/getDepartmentId`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ulbId: ulbid, userId }),
+      });
+      const data = await res.json();
+      if (data?.success && data?.data?.length > 0) {
+        setDepartmentId(data.data[0].NUM_USER_DEPTID);
+      } else {
+        setDepartmentId("");
+      }
+    } catch (err) {
+      setDepartmentId("");
+      console.error("Error fetching Department ID:", err);
     }
   };
 
@@ -381,6 +405,12 @@ const FrmInwardRegRpt = () => {
     }
   }, [ulbid]);
 
+  useEffect(() => {
+    if (userId && ulbid) {
+      fetchDepartmentId();
+    }
+  }, [ulbid, userId]);
+
   return (
     <Layout
       title="आवक रजिस्टर"
@@ -420,9 +450,8 @@ const FrmInwardRegRpt = () => {
             <input
               type="date"
               disabled={datesDisabled}
-              className={`form-input-box ${
-                datesDisabled ? "bg-slate-100 cursor-not-allowed" : ""
-              }`}
+              className={`form-input-box ${datesDisabled ? "bg-slate-100 cursor-not-allowed" : ""
+                }`}
               {...register("fromDate")}
             />
           </div>
@@ -432,9 +461,8 @@ const FrmInwardRegRpt = () => {
             <input
               type="date"
               disabled={datesDisabled}
-              className={`form-input-box ${
-                datesDisabled ? "bg-slate-100 cursor-not-allowed" : ""
-              }`}
+              className={`form-input-box ${datesDisabled ? "bg-slate-100 cursor-not-allowed" : ""
+                }`}
               {...register("toDate")}
             />
           </div>
