@@ -8,6 +8,8 @@ const {
   logout,
   getCurrentUser,
   getDesignationName,
+  getDepartmentName,
+  getDepartmentId
 } = require("../../../src/controllers/Admin/authController");
 const { getWardID } = require("../../../src/controllers/Admin/authController");
 const isValidToken = require("../../../src/controllers/Admin/isValidToken");
@@ -42,6 +44,8 @@ router.get("/api/me", checkJwt, getMe);
 router.post("/api/refresh", refreshToken);
 router.post("/api/logout", logout);
 router.post("/me", getCurrentUser);
-router.post("/getDesignationName", getDesignationName)
+router.post("/getDesignationName", getDesignationName);
+router.post("/getDepartmentId", getDepartmentId);
+router.post("/getDepartmentName", getDepartmentName);
 
 module.exports = router;

@@ -580,6 +580,86 @@ const getDesignationName = async (req, res) => {
   }
 };
 
+const getDepartmentId = async (req, res) => {
+  const { userId, ulbId } = req.body;
+  if (!ulbId || !userId) {
+    return res.json({
+      success: false,
+      errorMessage: "ULB ID and User ID is required",
+    });
+  }
+  let connection;
+  try {
+    connection = await getConnection();
+    const query = `
+    select 
+        num_user_deptid 
+    from admins.aoma_user_def 
+    where num_user_ulbid = :ulbId and num_user_userid = :userId
+`;
+
+    const bind = { ulbId, userId };
+    const result = await connection.execute(query, bind, {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+    });
+    res.json({
+      success: true,
+      data: result.rows || [],
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error("Error closing DB connection:", err);
+      }
+    }
+  }
+};
+
+const getDepartmentName = async (req, res) => {
+  const { departmentId } = req.body;
+  if (!departmentId) {
+    return res.json({
+      success: false,
+      errorMessage: "Department ID is required",
+    });
+  }
+  let connection;
+  try {
+    connection = await getConnection();
+    const query = `
+    select 
+      var_dept_marname 
+    from admins.aoms_dept_mas
+    where num_dept_id = :departmentId
+`;
+
+    const bind = { departmentId };
+    const result = await connection.execute(query, bind, {
+      outFormat: oracledb.OUT_FORMAT_OBJECT,
+    });
+    res.json({
+      success: true,
+      data: result.rows || [],
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ success: false, message: error.message });
+  } finally {
+    if (connection) {
+      try {
+        await connection.close();
+      } catch (err) {
+        console.error("Error closing DB connection:", err);
+      }
+    }
+  }
+};
+
 module.exports = {
   login,
   getWardID,
@@ -590,4 +670,6 @@ module.exports = {
   logout,
   getCurrentUser,
   getDesignationName,
+  getDepartmentId,
+  getDepartmentName
 };

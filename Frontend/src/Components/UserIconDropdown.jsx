@@ -4,13 +4,12 @@ import { useAuth } from "../Context/AuthContext";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
-const UserIconDropdown = ({ name = "", imageUrl = "", desigName = "" }) => {
+const UserIconDropdown = ({ name = "", imageUrl = "", desigName = "", deptName = "" }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { user, setUser, logout } = useAuth();
-  console.log(user);
   const userId = user?.userId;
   const ulbId = user?.ulbId;
-  const deptName = user?.prabhagName;
+  // const deptName = user?.prabhagName;
 
   const toggleDropdown = () => setIsOpen(!isOpen);
 
@@ -56,11 +55,6 @@ const UserIconDropdown = ({ name = "", imageUrl = "", desigName = "" }) => {
       logout(); // Always clear local state and redirect
     }
   };
-
-  console.log(userId);
-  console.log(name);
-  console.log(deptName);
-  console.log(desigName);
 
   return (
     <div className="relative inline-block text-left">

@@ -9,12 +9,16 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const Header = ({ toggleSidebar: parentToggleSidebar }) => {
   const { user } = useAuth();
+  const userId = user?.userId;
   const ulbId = user?.ulbId;
   const desigId = user?.desigId;
+  // const deptId = user?.deptId;
   const userName = user?.username;
   const navigate = useNavigate();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [desigName, setDesigName] = useState("");
+  const [departmentId, setDepartmentId] = useState("");
+  const [deptName, setDeptName] = useState("");
   const [corpName, setCorpName] = useState("");
   const [corpEName, setCorpEName] = useState("");
   const [logo, setLogo] = useState(null);
@@ -57,9 +61,61 @@ const Header = ({ toggleSidebar: parentToggleSidebar }) => {
       console.error("Error fetching designation details:", err);
     }
   };
+
+  const fetchDepartmentId = async () => {
+    if (!userId || !ulbId) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/getDepartmentId`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ulbId, userId }),
+      });
+      const data = await res.json();
+      if (data?.success && data?.data?.length > 0) {
+        setDepartmentId(data.data[0].NUM_USER_DEPTID);
+      } else {
+        setDepartmentId("");
+      }
+    } catch (err) {
+      setDepartmentId("");
+      console.error("Error fetching Department ID:", err);
+    }
+  };
+
+  const fetchDepartmentName = async () => {
+    if (!departmentId) return;
+    try {
+      const res = await fetch(`${API_BASE_URL}/getDepartmentName`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ departmentId }),
+      });
+      const data = await res.json();
+      if (data?.success && data?.data?.length > 0) {
+        setDeptName(data.data[0].VAR_DEPT_MARNAME);
+      } else {
+        setDeptName("");
+      }
+    } catch (err) {
+      setDeptName("");
+      console.error("Error fetching Department Name:", err);
+    }
+  };
   useEffect(() => {
     fetchCorpDetails();
   }, [ulbId]);
+
+  useEffect(() => {
+    if (ulbId && userId) {
+      fetchDepartmentId();
+    }
+  }, [ulbId, userId])
+
+  useEffect(() => {
+    if (departmentId) {
+      fetchDepartmentName();
+    }
+  }, [departmentId])
 
   useEffect(() => {
     if (ulbId && desigId) {
@@ -122,7 +178,7 @@ const Header = ({ toggleSidebar: parentToggleSidebar }) => {
 
       {/* ---------- Right: User dropdown ---------- */}
       <div className="flex items-center gap-2 flex-shrink-0">
-        <UserIconDropdown desigName={desigName} name={userName} className="w-9 h-9 md:w-10 md:h-10" />
+        <UserIconDropdown desigName={desigName} name={userName} deptName={deptName} className="w-9 h-9 md:w-10 md:h-10" />
       </div>
     </header>
   );
