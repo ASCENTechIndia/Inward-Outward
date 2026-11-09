@@ -54,8 +54,7 @@ export const AuthProvider = ({ children }) => {
           prabhagName: localStorage.getItem("prabhagName"),
           prabhagID: localStorage.getItem("prabhagID"),
           corporation: localStorage.getItem("corporation"),
-          opdid: localStorage.getItem("opdid"),
-          opdname: localStorage.getItem("opdname") || "",
+          desigId: localStorage.getItem("desigId") || "",
           token,
         };
 
@@ -72,14 +71,6 @@ export const AuthProvider = ({ children }) => {
     try {
       const decoded = jwtDecode(token);
       const userId = decoded.userId;
-      const opdid =
-        Array.isArray(userConfig) && userConfig.length > 0
-          ? userConfig[0].NUM_USERCOFIG_OPDID
-          : "";
-      const opdname =
-        Array.isArray(userConfig) && userConfig.length > 0
-          ? userConfig[0].VAR_OPD_NAME
-          : "";
       localStorage.setItem("username", userData.Out_UserName);
       localStorage.setItem("deptid", userData.acccounttype);
       localStorage.setItem("ulbId", userData.out_OrgId);
@@ -91,8 +82,6 @@ export const AuthProvider = ({ children }) => {
       localStorage.setItem("prabhagID", userData.prabhagID || ""); // Fixed key
       localStorage.setItem("userId", userData.userId);
       localStorage.setItem("corporation", userData.corporation || "");
-      localStorage.setItem("opdid", opdid);
-      localStorage.setItem("opdname", opdname || "");
 
       sessionStorage.setItem("inwardSession", "true");
       localStorage.setItem("inwardSession", "true");
@@ -108,8 +97,7 @@ export const AuthProvider = ({ children }) => {
         prabhagName: userData.prabhagName,
         prabhagID: userData.prabhagID,
         corporation: userData.corporation || "",
-        opdid,
-        opdname,
+        desigId: userData.desigId || "",
         token,
       });
     } catch (error) {
@@ -147,8 +135,7 @@ export const AuthProvider = ({ children }) => {
               prabhagName: localStorage.getItem("prabhagName"),
               prabhagID: localStorage.getItem("prabhagID"),
               corporation: localStorage.getItem("corporation"),
-              opdid: localStorage.getItem("opdid"),
-              opdname: localStorage.getItem("opdname") || "",
+              desigId: localStorage.getItem("desigId") || "",
               token,
             };
             setUser(userData);
@@ -174,8 +161,8 @@ export const AuthProvider = ({ children }) => {
         } else {
           setUser(null);
         }
-      } catch {
-        console.log("ME API ERROR:", error.response?.data);
+      } catch(error) {
+        console.error("ME API ERROR:", error.response?.data);
         setUser(null);
       }
 
