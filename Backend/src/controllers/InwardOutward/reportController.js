@@ -68,8 +68,15 @@ const getInwardRegisterReport = async (req, res) => {
 
     connection = await getConnection();
 
-    let query = `SELECT * FROM view_inw_regdet WHERE 1=1 AND status <> 'C'`;
+    let query = `SELECT * FROM view_inw_regdet WHERE 1=1`;
     const bind = { ulbid: Number(ulbid) };
+
+    if(Number(ulbid) === 2){
+      query += ""
+    }
+    else{
+      query += "AND status <> 'C'"
+    }
 
     // Date filter
     if (includeDateFilter && fromDate && toDate) {
